@@ -1,0 +1,18 @@
+{
+  "repository": "CIBOTFLOW/Luzione-FEP-Allocation",
+  "version": "0.5.0",
+  "effect_posture": "NO_EFFECT",
+  "work": [
+    {"id":"ALLOC-501","status":"READY","title":"Pin shared public-safe contracts"},
+    {"id":"ALLOC-502","status":"READY","title":"Implement production web application shell"},
+    {"id":"ALLOC-503","status":"READY","title":"Implement organization auth and sponsor access policies"},
+    {"id":"ALLOC-504","status":"READY","title":"Implement program and available-allocation read models"},
+    {"id":"ALLOC-505","status":"READY","title":"Implement reviewed cohort selector"},
+    {"id":"ALLOC-506","status":"READY","title":"Implement public-safe case-card browser"},
+    {"id":"ALLOC-507","status":"READY","title":"Implement allocation-intent creation and status"},
+    {"id":"ALLOC-508","status":"READY","title":"Implement minimum-cohort aggregate reporting"},
+    {"id":"ALLOC-509","status":"READY","title":"Add sponsor audit ledger and exports"},
+    {"id":"ALLOC-510","status":"READY","title":"Reconcile reference tests with live FEP APIs","dependencies":["ALLOC-503","ALLOC-506","ALLOC-507"]},
+    {"id":"ALLOC-511","status":"BLOCKED_BY_HUMAN_AUTHORITY","title":"Enable production sponsor allocation","blocker":"legal, accounting, privacy, access-policy, and live FEP authorization"}
+  ]
+}
