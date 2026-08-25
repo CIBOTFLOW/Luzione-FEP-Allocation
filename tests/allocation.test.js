@@ -136,6 +136,29 @@ test('intent replay is idempotent', () => {
   assert.equal(service.createAllocationIntent(input).allocationIntentId, service.createAllocationIntent(input).allocationIntentId)
 })
 
+test('idempotency conflict is rejected', () => {
+  const { service, program } = fixture()
+  card(service)
+  service.createAllocationIntent({
+    sponsorCode: 'ACME',
+    programId: program.programId,
+    targetType: 'PUBLIC_CASE_CARD',
+    publicCode: 'CARD-1',
+    amountMinor: 10000,
+    idempotencyKey: 'i1',
+    correlationId: 'c',
+  })
+  assert.throws(() => service.createAllocationIntent({
+    sponsorCode: 'ACME',
+    programId: program.programId,
+    targetType: 'PUBLIC_CASE_CARD',
+    publicCode: 'CARD-1',
+    amountMinor: 12000,
+    idempotencyKey: 'i1',
+    correlationId: 'c',
+  }), /idempotency/)
+})
+
 test('insufficient sponsor allocation is rejected', () => {
   const { service, program } = fixture()
   card(service)

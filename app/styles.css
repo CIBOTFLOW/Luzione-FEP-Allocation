@@ -1,0 +1,328 @@
+:root {
+  color-scheme: light;
+  --bg: #f7f8fa;
+  --panel: #ffffff;
+  --ink: #1b1f24;
+  --muted: #68727d;
+  --line: #d9dee5;
+  --accent: #0f766e;
+  --accent-dark: #115e59;
+  --warn: #9a3412;
+  --soft: #eef6f5;
+  --soft-warn: #fff3eb;
+  --shadow: 0 8px 24px rgba(27, 31, 36, 0.07);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+  letter-spacing: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.appShell {
+  display: grid;
+  grid-template-columns: 256px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  border-right: 1px solid var(--line);
+  background: #ffffff;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brandMark {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+.brand small,
+.posture span,
+.muted {
+  color: var(--muted);
+}
+
+.brand small,
+.brand strong {
+  display: block;
+}
+
+nav {
+  display: grid;
+  gap: 4px;
+}
+
+nav a {
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: #30363d;
+}
+
+nav a:hover {
+  background: var(--soft);
+}
+
+.posture {
+  margin-top: auto;
+  display: grid;
+  gap: 6px;
+  border: 1px solid #f0c9b8;
+  border-radius: 8px;
+  background: var(--soft-warn);
+  padding: 12px;
+  font-size: 13px;
+}
+
+.content {
+  min-width: 0;
+  padding: 28px;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  font-size: 28px;
+  line-height: 1.15;
+  margin-bottom: 8px;
+}
+
+h2 {
+  font-size: 18px;
+  margin-bottom: 14px;
+}
+
+h3 {
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.section {
+  margin-top: 18px;
+}
+
+.card,
+.metric,
+.tableWrap,
+.formPanel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.card,
+.formPanel {
+  padding: 16px;
+}
+
+.metric {
+  padding: 14px;
+}
+
+.metric strong {
+  display: block;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.metric span,
+.badge,
+td,
+th,
+label,
+input,
+select,
+textarea,
+button {
+  font-size: 14px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 9px;
+  background: #fff;
+  color: #38404a;
+}
+
+.badge.good {
+  border-color: #a7d8cf;
+  background: var(--soft);
+  color: var(--accent-dark);
+}
+
+.badge.warn {
+  border-color: #f0c9b8;
+  background: var(--soft-warn);
+  color: var(--warn);
+}
+
+.tableWrap {
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--line);
+  padding: 11px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: #f1f4f7;
+  color: #4a5561;
+  font-weight: 700;
+}
+
+tr:last-child td {
+  border-bottom: 0;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.button,
+button {
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  min-height: 38px;
+  padding: 9px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.button.secondary {
+  background: #fff;
+  color: var(--accent-dark);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  color: #3f4852;
+  font-weight: 700;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px;
+  font: inherit;
+  color: var(--ink);
+  background: #fff;
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+.stack {
+  display: grid;
+  gap: 12px;
+}
+
+@media (max-width: 920px) {
+  .appShell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    height: auto;
+  }
+
+  nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .grid,
+  .two,
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pageHeader {
+    display: grid;
+  }
+}
