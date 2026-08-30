@@ -1,18 +1,16 @@
-# Codex Master Prompt — Luzione FEP Allocation v0.5
+# Codex Master Prompt — Luzione FEP Allocation v0.6
 
 Initialize this repository as the company-facing portal for `fep.luzione.com`.
 
 ## Build sequence
 
-1. Pin the v0.5 public-case-card and allocation contracts.
-2. Implement authenticated organization membership and sponsor access policy.
-3. Implement programs, available allocation, reviewed cohort definitions, public case cards, and allocation intents.
-4. Make exact sensitive values impossible to retrieve through sponsor APIs.
-5. Add intent review state and FEP acceptance/rejection readback.
-6. Add aggregate reporting with minimum cohort-size suppression.
-7. Add audit records for every sponsor view, filter, export, and intent.
-8. Add accessible responsive UI for Overview, Programs, Opportunities, Allocations, Impact, and Settings.
-9. Add concurrency, authorization, forbidden-field, inference-risk, and idempotency tests.
-10. Deploy preview only; production remains gated by FEP access authorization and legal review.
+1. Preserve the v0.6 public-safe, program/cohort-only sponsor boundary.
+2. Replace the reference token map with IdP-backed server sessions and durable organization membership.
+3. Replace in-memory FEP projections with authenticated, versioned FEP APIs and signature verification.
+4. Persist sponsor intents, idempotency claims, readback receipts, and audits in Postgres.
+5. Add transaction/concurrency tests around aggregate intent holds and FEP projection reconciliation.
+6. Add export audit and purpose-limited retention controls.
+7. Verify the responsive browser journeys and degraded FEP states in preview.
+8. Keep production blocked until access authorization, privacy, accounting, and legal review are attributed.
 
 Never add direct FEP database credentials to the browser. Never implement direct sponsor approval, recipient contact, or transfer. Preserve the no-effect reference tests while replacing the in-memory store with authenticated APIs.
