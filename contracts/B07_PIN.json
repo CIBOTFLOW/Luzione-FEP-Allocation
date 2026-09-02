@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0.0",
+  "controller_release": "19cf3a752f761a632349ab2581efc2730a557964",
+  "adapter_contract": "luzione-fep-allocation-simulation/v0.1-draft",
+  "receipt_contract": "luzione-fep-allocation-receipt/v0.1-draft",
+  "effect_mode": "DISABLED",
+  "api": {
+    "owner": "CIBOTFLOW/Luzione-API",
+    "producer_sha": null,
+    "identity": "luzione-request-identity/v1",
+    "command": "luzione-command-ledger/v0.1",
+    "readback": "luzione-causal-readback/v0.1",
+    "status": "TRANSITIONAL_DRAFT_PIN_INTEGRATION_BLOCKED"
+  },
+  "fep": {
+    "owner": "CIBOTFLOW/FEP-Platform",
+    "producer_implementation_sha": "e8490fb606d6c8534180bb0412186534143cc510",
+    "balanced_journal": "fep-balanced-journal/v0.1-draft",
+    "balanced_journal_schema_sha256": "5023cebce38e4bb43a7372aad85bc457c48d9adf62b8ab9ab3d02a26ac0a54c4",
+    "policy": "fep-policy-rules-v1",
+    "status": "G0_EFFECT_DISABLED_DRAFT"
+  },
+  "authority": {
+    "write_fep_journal": false,
+    "move_money": false,
+    "select_named_recipient_for_sponsor": false
+  }
+}

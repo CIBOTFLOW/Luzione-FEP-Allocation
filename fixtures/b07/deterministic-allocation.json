@@ -1,0 +1,64 @@
+{
+  "snapshot": {
+    "schemaVersion": "luzione-fep-allocation-simulation/v0.1-draft",
+    "effectMode": "DISABLED",
+    "runAt": "2026-09-02T20:00:00.000Z",
+    "identity": {
+      "contractVersion": "luzione-request-identity/v1",
+      "tenantId": "tenant-acme",
+      "actorIdHash": "1111111111111111111111111111111111111111111111111111111111111111",
+      "scopes": ["allocation:simulate"],
+      "expiresAt": "2026-09-02T20:10:00.000Z"
+    },
+    "request": {
+      "requestId": "b07-request-1",
+      "tenantId": "tenant-acme",
+      "idempotencyKey": "b07-idempotency-1",
+      "correlationId": "b07-correlation-1",
+      "requestedAmountMinor": 600,
+      "currency": "USD",
+      "commandContractVersion": "luzione-command-ledger/v0.1",
+      "readbackContractVersion": "luzione-causal-readback/v0.1"
+    },
+    "funding": {
+      "contractVersion": "fep-balanced-journal/v0.1-draft",
+      "producerSha": "e8490fb606d6c8534180bb0412186534143cc510",
+      "schemaSha256": "5023cebce38e4bb43a7372aad85bc457c48d9adf62b8ab9ab3d02a26ac0a54c4",
+      "journalHeadHash": "2222222222222222222222222222222222222222222222222222222222222222",
+      "sourceReceiptHash": "3333333333333333333333333333333333333333333333333333333333333333",
+      "availableMinor": 600,
+      "currency": "USD",
+      "asOf": "2026-09-02T19:55:00.000Z"
+    },
+    "policy": {
+      "contractVersion": "fep-policy-rules-v1",
+      "policyVersion": "policy-b07-v1",
+      "policyHash": "4444444444444444444444444444444444444444444444444444444444444444",
+      "eligiblePopulationHash": "5555555555555555555555555555555555555555555555555555555555555555",
+      "minimumGroupSize": 2,
+      "validUntil": "2026-09-03T20:00:00.000Z"
+    },
+    "candidates": [
+      {
+        "eligibilityRef": "elig_aaaaaaaaaaaa",
+        "priorityUnits": 3,
+        "maximumAllocationMinor": 600,
+        "fairnessGroup": "broad-region-a"
+      },
+      {
+        "eligibilityRef": "elig_bbbbbbbbbbbb",
+        "priorityUnits": 2,
+        "maximumAllocationMinor": 600,
+        "fairnessGroup": "broad-region-a"
+      },
+      {
+        "eligibilityRef": "elig_cccccccccccc",
+        "priorityUnits": 1,
+        "maximumAllocationMinor": 600,
+        "fairnessGroup": "broad-region-b"
+      }
+    ]
+  },
+  "snapshotHash": "13ed4013dca9a9ed598b28556c88abf7b74f25635c14be24b7af6db3b3b61567",
+  "expectedReceiptHash": "ec82752580df28a7ad6e9b00b579d77d03668964ddd29f0ceb25cf90595ccb5c"
+}
