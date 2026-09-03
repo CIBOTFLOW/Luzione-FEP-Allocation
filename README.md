@@ -1,12 +1,8 @@
-# Luzione FEP Allocation v0.8
+# Luzione FEP Allocation v0.7
 
-Luzione movement media, Sponsor Outcome Studio, and the internal FEP operating-system preview for `fep.luzione.com`.
+Review-only Sponsor Outcome Studio for `fep.luzione.com`.
 
-The product now has three deliberately separated surfaces:
-
-- the **Luzione app**, an Instagram/X-inspired movement feed for verified support events and clearly labeled voluntary updates;
-- the **Luzione Sponsor Outcome Studio**, where a company versions its identity, configures a capped campaign, and requests a bounded public-code outcome;
-- the **internal FEP OS**, where masked identity, validation, prioritization authority, support readback, evaluation, system health, and program knowledge belong.
+The studio turns sponsor funding preferences into bounded, auditable requests that FEP Platform may independently review. It gives a company one place to version its public identity, configure a capped campaign, browse privacy-safe opportunities, request one exact verified outcome by public code, and follow a consented proof event through completion.
 
 It does **not** let a sponsor identify or contact a recipient, inspect private evidence, approve a case, reserve authoritative funds, move money, promise publicity, issue cryptocurrency, or create charitable-deduction language.
 
@@ -23,14 +19,10 @@ It does **not** let a sponsor identify or contact a recipient, inspect private e
 - financial-promise scanning that rejects public copy suggesting a coin, crypto, trading, cash-out, appreciation, yield, investment return, or future conversion entitlement;
 - closed-loop product boundaries for nonmonetary **Luzione Impact Points** and funded **Luzione Essentials Credits**;
 - tenant audit history and minimum-cohort reporting suppression;
-- responsive movement feed with Happy Moments, trending/latest/following views, account and generalized-location attribution, captions beneath media, photo/video/slideshow selection, heart, threaded photo comments, send, bookmark, and follow controls—without repost behavior;
-- a support ledger that separates request recording, receipt acknowledgement, validation requirements, lifecycle state, and optional consented publication;
-- a read-only masked priority queue for generalized need, immediacy bands, policy-safe factors, and FEP-controlled human review, with Sultan limited to decision support;
-- an internal control room with overall/daily impact, system-by-system health, evaluation evidence, governance measures, and living program knowledge;
-- responsive Sponsor Outcome Studio with campaign, allocation, and authority views;
+- responsive Sponsor Outcome Studio with campaign, proof, allocation, and authority views;
 - production startup that fails closed without a server-side authentication token map.
 
-The current service is an in-memory, no-effect reference implementation. Selected photo/video files are previewed locally and only public-safe metadata is retained; durable media storage is not connected. Its fixture verifier and seeded demo are not production authority.
+The current service is an in-memory, no-effect reference implementation. Its fixture verifier and seeded demo are not production authority.
 
 ## The three funding rails
 
@@ -81,10 +73,6 @@ Open `http://localhost:8091`. The non-production demo contains synthetic public-
 
 ```text
 GET  /health
-GET  /v1/movement-feed?sort=TRENDING|LATEST|FOLLOWING
-POST /v1/movement-posts
-POST /v1/movement-posts/:postId/comments
-POST /v1/movement-posts/:postId/interactions
 GET  /v1/overview
 GET  /v1/programs
 GET  /v1/cohorts?programId=...
@@ -97,9 +85,6 @@ POST /v1/campaigns/:campaignId/submit
 GET  /v1/sponsored-outcomes
 POST /v1/sponsored-outcomes
 GET  /v1/proof-feed
-GET  /v1/priority-queue?programId=...
-GET  /v1/support-ledger
-GET  /v1/platform-status
 GET  /v1/allocation-intents
 POST /v1/allocation-intents
 GET  /v1/impact?programId=...
@@ -118,11 +103,10 @@ Never put the token map, FEP credentials, receipt-verification keys, private cas
 ## Remaining activation gates
 
 1. Production IdP/session and durable tenant membership.
-2. Authenticated live FEP brand, campaign, public-card, request, proof, balance, disposition, priority, and impact endpoints.
-3. Transactional Postgres command/idempotency/audit/post/comment persistence with migration, rollback, and concurrency evidence.
-4. Durable object storage, malware scanning, media moderation, deletion/consent-revocation workflows, and delivery controls.
-5. Fund custody, restricted-ledger, refund/reversal, merchant-settlement, and reconciliation integrations.
-6. Legal, privacy, accounting, tax, payments, accessibility, content, and incident-response approval.
-7. A small capped pilot with explicit stop conditions and no public claim beyond verified readback.
+2. Authenticated live FEP brand, campaign, public-card, request, proof, balance, disposition, and impact endpoints.
+3. Transactional Postgres command/idempotency/audit persistence with migration, rollback, and concurrency evidence.
+4. Fund custody, restricted-ledger, refund/reversal, merchant-settlement, and reconciliation integrations.
+5. Legal, privacy, accounting, tax, payments, accessibility, content, and incident-response approval.
+6. A small capped pilot with explicit stop conditions and no public claim beyond verified readback.
 
 This release is G0, synthetic, and no-effect. It is neither integrated nor production-ready, and the design documentation is not legal advice.

@@ -19,9 +19,7 @@ export function createDemoAllocationService() {
   service.createOrganization({ code: 'LUZIONE', name: 'Luzione', currency: 'USD' })
   service.addMembership({ sponsorCode: 'LUZIONE', subjectId: 'demo-luzione-planner', role: 'ADMIN' })
   service.addMembership({ sponsorCode: 'LUZIONE', subjectId: 'demo-luzione-viewer', role: 'VIEWER' })
-  service.addMembership({ sponsorCode: 'LUZIONE', subjectId: 'demo-community-member', role: 'VIEWER' })
   const actor = service.actor('LUZIONE', 'demo-luzione-planner')
-  const communityActor = service.actor('LUZIONE', 'demo-community-member')
 
   const balanceProjection = {
     projectionVersion: 1,
@@ -282,56 +280,6 @@ export function createDemoAllocationService() {
       { ...mediaPayload, publicationConsentVerified: true },
       receipt('MEDIA_EVENT', mediaEventId, 'fep-media-event-v1', mediaPayload),
     )
-  })
-
-  const communityPost = service.createMovementPost({
-    actor: communityActor,
-    sponsorCode: 'LUZIONE',
-    displayName: 'Maya R.',
-    handle: 'maya.moves',
-    location: 'San Mateo County, California',
-    caption: 'A transit pass made the first week of a new work schedule feel possible. Sharing the moment without sharing anyone\'s private story.',
-    mediaItems: [{
-      fileName: 'transit-first-week.jpg',
-      mimeType: 'image/jpeg',
-      byteSize: 184000,
-      sha256: '8'.repeat(64),
-      altText: 'A transit pass beside a notebook and morning coffee',
-    }],
-    publicCaseCode: 'LZN-WORK-002',
-    publicationConsentVerified: true,
-    idempotencyKey: 'demo-community-post-1',
-  })
-
-  const firstComment = service.createMovementComment({
-    actor: communityActor,
-    sponsorCode: 'LUZIONE',
-    postId: 'proof:' + mediaEventId,
-    parentCommentId: null,
-    displayName: 'Maya R.',
-    handle: 'maya.moves',
-    text: 'The clear status trail makes this feel real and respectful.',
-    attachment: null,
-  })
-  service.createMovementComment({
-    actor,
-    sponsorCode: 'LUZIONE',
-    postId: 'proof:' + mediaEventId,
-    parentCommentId: firstComment.commentId,
-    displayName: 'Luzione Team',
-    handle: 'luzione',
-    text: 'That is the goal: useful proof without turning a person into content.',
-    attachment: null,
-  })
-  service.createMovementComment({
-    actor,
-    sponsorCode: 'LUZIONE',
-    postId: communityPost.postId,
-    parentCommentId: null,
-    displayName: 'Luzione Team',
-    handle: 'luzione',
-    text: 'Thank you for sharing this happy moment.',
-    attachment: null,
   })
 
   return {

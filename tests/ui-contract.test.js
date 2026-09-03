@@ -17,19 +17,7 @@ test('studio markup has unique IDs and closed navigation targets', () => {
   assert.equal(new Set(ids).size, ids.length)
 
   const views = values(/\sdata-view="([^"]+)"/g, html)
-  assert.deepEqual(views, [
-    'movement',
-    'opportunities',
-    'campaigns',
-    'sponsorships',
-    'overview',
-    'priority',
-    'ledger',
-    'allocations',
-    'health',
-    'knowledge',
-    'settings',
-  ])
+  assert.deepEqual(views, ['overview', 'campaigns', 'opportunities', 'sponsorships', 'proof', 'allocations', 'settings'])
   for (const view of views) {
     assert.ok(ids.includes(view), `navigation target ${view} must exist`)
     assert.match(html, new RegExp(`data-view="${view}"[^>]+aria-controls="${view}"`))
@@ -62,37 +50,9 @@ test('browser rendering uses text-safe DOM operations and all sponsor APIs', () 
     '/v1/campaigns',
     '/v1/sponsored-outcomes',
     '/v1/proof-feed',
-    '/v1/movement-feed',
-    '/v1/movement-posts',
-    '/v1/priority-queue',
-    '/v1/support-ledger',
-    '/v1/platform-status',
     '/v1/settings',
   ]) assert.ok(script.includes(path), `${path} must be wired into the browser`)
   assert.doesNotMatch(html + script, /bravi|bravvi/i)
-})
-
-test('movement UI matches the media, engagement, and internal-platform separation brief', () => {
-  assert.match(html, /Happy Moments/)
-  assert.match(html, /data-feed-sort="TRENDING"[^>]+aria-pressed="true"/)
-  assert.match(html, /name="media"[^>]+video\/mp4[^>]+multiple/)
-  assert.match(html, /name="location"/)
-  assert.match(html, /name="caption"/)
-  assert.match(html, /Optional public case code/)
-  assert.match(html, /FEP OS · internal/)
-  assert.match(html, /Not a public-facing website/)
-  assert.match(html, /Support ledger/)
-  assert.match(html, /Masked priority queue/)
-  assert.match(html, /Sultan supports the review/)
-  assert.match(html, /System-by-system health/)
-  assert.match(html, /Program knowledge/)
-  assert.match(script, /'Like'/)
-  assert.match(script, /'Comment'/)
-  assert.match(script, /'Send'/)
-  assert.match(script, /'Bookmark'/)
-  assert.match(script, /'FOLLOW'/)
-  assert.doesNotMatch(html + script, /repost/i)
-  assert.match(styles, /\.post-media\s*\{[^}]*width:\s*88%/s)
 })
 
 test('responsive and keyboard-motion boundaries are explicit', () => {
