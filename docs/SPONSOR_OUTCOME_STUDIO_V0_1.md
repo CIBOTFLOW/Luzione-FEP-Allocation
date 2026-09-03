@@ -2,9 +2,28 @@
 
 ## Product decision
 
-The first sellable Luzione/FEM product is a **verified-outcome sponsorship workflow**, not a general consumer app and not a cryptocurrency. A sponsor buys a bounded operational result: configure a campaign, request an eligible public outcome, and receive FEP-verified completion media if separate consent exists.
+The first sellable Luzione/FEM product remains a **verified-outcome sponsorship workflow**, not a cryptocurrency. It now feeds a distinct public Luzione movement-media surface: a sponsor configures a campaign, requests an eligible public outcome, and receives FEP-verified completion media if separate consent exists; the public app may distribute that proof only under the separate publication rules.
 
-This repository is the sponsor-facing control plane. FEP Platform remains the policy, identity, case, appeal, fulfillment, ledger, and final-readback authority.
+This repository previews three separated surfaces: the public Luzione app, the sponsor-facing workspace, and the internal FEP operating system. FEP Platform remains the policy, identity, priority, case, appeal, fulfillment, ledger, and final-readback authority.
+
+## Movement-media experience
+
+- The default tab is a continuously growing feed combining verified support projections and clearly labeled voluntary updates.
+- Trending is the main feed order; latest and followed-account ordering are available.
+- Happy Moments presents a horizontal reel-style strip without copying Instagram naming.
+- Posts are tied to public accounts and generalized locations, with captions below an image, slideshow, or video.
+- Heart, X-style threaded comments with optional pictures, send, bookmark, and follow are supported. Repost is intentionally absent.
+- A voluntary author cannot mark their own update as an FEP-verified outcome.
+- Local media selection works in G0, but durable upload, scanning, moderation, and deletion are production gates.
+
+## Internal FEP OS experience
+
+- The platform is visibly labeled internal and not a public-facing website.
+- The control room tallies overall impact, daily impact, governance enforcement, and verified receipt counts.
+- A masked priority queue shows generalized needs, necessity bands, and policy-safe factors. Sultan is decision support only; FEP-controlled human review retains selection authority.
+- The support ledger distinguishes request receipt, validation requirements, current lifecycle state, and optional public posting.
+- System health is shown system by system, including simulated passes, disabled effects, and missing durable media.
+- Evaluation evidence and a living program-knowledge panel document the current operating model and open gates.
 
 ## User journey
 
@@ -68,6 +87,6 @@ Success is not user registration. It is a small number of outcomes that are fund
 - production identity or durable organization membership;
 - transactional reserve, refund, reversal, settlement, or reconciliation ledger;
 - public livestream or podcast publishing;
+- durable movement media, moderation, or cross-device post persistence;
 - any points or credit issuance;
 - blockchain, token, wallet, exchange, or treasury behavior.
-

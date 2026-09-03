@@ -52,7 +52,7 @@ const PUBLIC_CARD_KEYS = new Set([
 ])
 
 const ROLE_PERMISSIONS = {
-  VIEWER: new Set(['VIEW']),
+  VIEWER: new Set(['VIEW', 'POST_MOVEMENT_UPDATE', 'ENGAGE_MOVEMENT']),
   PLANNER: new Set([
     'VIEW',
     'CREATE_INTENT',
@@ -60,6 +60,8 @@ const ROLE_PERMISSIONS = {
     'CONFIGURE_BRAND',
     'CONFIGURE_CAMPAIGN',
     'SPONSOR_OUTCOME',
+    'POST_MOVEMENT_UPDATE',
+    'ENGAGE_MOVEMENT',
   ]),
   ADMIN: new Set([
     'VIEW',
@@ -68,6 +70,8 @@ const ROLE_PERMISSIONS = {
     'CONFIGURE_BRAND',
     'CONFIGURE_CAMPAIGN',
     'SPONSOR_OUTCOME',
+    'POST_MOVEMENT_UPDATE',
+    'ENGAGE_MOVEMENT',
     'VIEW_AUDIT',
   ]),
 }
@@ -90,6 +94,16 @@ const ATTRIBUTION_MODES = new Set([
 ])
 
 const BRAND_MIME_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp'])
+
+const MOVEMENT_MEDIA_MIME_TYPES = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'video/mp4',
+  'video/webm',
+])
+
+const MOVEMENT_INTERACTIONS = new Set(['LIKE', 'SAVE', 'SEND', 'FOLLOW'])
 
 const HELD_SPONSORED_OUTCOME_STATUSES = new Set([
   'SUBMITTED_FOR_FEP_REVIEW',
@@ -305,6 +319,59 @@ function mediaEventPublicView(event, brand) {
   }
 }
 
+function movementHandle(value) {
+  const normalized = required(value, 'handle', 40).toLowerCase().replace(/^@/, '')
+  if (!/^[a-z0-9._-]{2,40}$/.test(normalized)) {
+    throw new AllocationError('MOVEMENT_HANDLE_INVALID', 'handle must use 2-40 letters, numbers, dots, underscores, or hyphens')
+  }
+  return normalized
+}
+
+function friendlyLifecycle(value) {
+  return String(value).replaceAll('_', ' ').toLowerCase().replace(/^./, (character) => character.toUpperCase())
+}
+
+function movementMediaItem(input, index, { imagesOnly = false } = {}) {
+  assertAllowedKeys(input, ['altText', 'byteSize', 'fileName', 'mimeType', 'sha256'], `media item ${index + 1}`)
+  const fileName = required(input.fileName, `mediaItems[${index}].fileName`, 120)
+  if (!/^[A-Za-z0-9][A-Za-z0-9._ -]{0,119}$/.test(fileName)) {
+    throw new AllocationError('MOVEMENT_MEDIA_FILE_INVALID', 'media file name must not contain a path or control characters')
+  }
+  const mimeType = required(input.mimeType, `mediaItems[${index}].mimeType`, 40).toLowerCase()
+  if (!MOVEMENT_MEDIA_MIME_TYPES.has(mimeType) || (imagesOnly && !mimeType.startsWith('image/'))) {
+    throw new AllocationError('MOVEMENT_MEDIA_TYPE_INVALID', imagesOnly
+      ? 'comment attachments must be PNG, JPEG, or WebP'
+      : 'movement media must be PNG, JPEG, WebP, MP4, or WebM')
+  }
+  if (!Number.isSafeInteger(input.byteSize) || input.byteSize < 1 || input.byteSize > 25_000_000) {
+    throw new AllocationError('MOVEMENT_MEDIA_SIZE_INVALID', 'each media item must be between 1 byte and 25 MB')
+  }
+  const mediaSha256 = digest(input.sha256, `mediaItems[${index}].sha256`)
+  const item = {
+    mediaId: 'movement_media_' + hash({ fileName, mimeType, sha256: mediaSha256, index }).slice(0, 24),
+    fileName,
+    mimeType,
+    byteSize: input.byteSize,
+    sha256: mediaSha256,
+    altText: required(input.altText, `mediaItems[${index}].altText`, 180),
+    storageState: 'LOCAL_PREVIEW_ONLY',
+  }
+  assertPublicSafe({ fileName: item.fileName, altText: item.altText }, 'movement media')
+  return item
+}
+
+function movementCommentPublicView(comment) {
+  return {
+    commentId: comment.commentId,
+    postId: comment.postId,
+    parentCommentId: comment.parentCommentId,
+    account: { ...comment.account },
+    text: comment.text,
+    attachment: comment.attachment ? { ...comment.attachment } : null,
+    createdAt: comment.createdAt,
+  }
+}
+
 function publicCardView(card) {
   return {
     publicCode: card.publicCode,
@@ -362,6 +429,9 @@ export class AllocationService {
     this.campaigns = new Map()
     this.sponsoredOutcomeRequests = new Map()
     this.mediaEvents = new Map()
+    this.movementPosts = new Map()
+    this.movementComments = new Map()
+    this.movementInteractions = new Map()
     this.audit = []
     this.idempotency = new Map()
     this.fepReceipts = new Map()
@@ -965,6 +1035,421 @@ export class AllocationService {
       .filter((event) => event.status === 'PUBLISHED' && this.campaigns.get(event.campaignId)?.sponsorCode === code)
       .sort((left, right) => right.occurredAt.localeCompare(left.occurredAt))
       .map((event) => mediaEventPublicView(event, this.brandVersions.get(event.brandVersionId)))
+  }
+
+  movementViewerKey(actor) {
+    return actor ? hash({ sponsorCode: actor.sponsorCode, subjectId: actor.subjectId }) : null
+  }
+
+  movementInteractionRecord(actor) {
+    const viewerKey = this.movementViewerKey(actor)
+    if (!viewerKey) return null
+    if (!this.movementInteractions.has(viewerKey)) {
+      this.movementInteractions.set(viewerKey, {
+        likedPostIds: new Set(),
+        savedPostIds: new Set(),
+        sentPostIds: new Set(),
+        followedAccountIds: new Set(),
+      })
+    }
+    return this.movementInteractions.get(viewerKey)
+  }
+
+  movementEngagement(postId, accountId, actor, kind) {
+    const baseline = kind === 'VERIFIED_SUPPORT'
+      ? { likeCount: 34, sendCount: 9, saveCount: 14 }
+      : { likeCount: 7, sendCount: 2, saveCount: 4 }
+    const records = [...this.movementInteractions.values()]
+    const comments = [...this.movementComments.values()].filter((comment) => comment.postId === postId)
+    const viewer = actor ? this.movementInteractionRecord(actor) : null
+    return {
+      likeCount: baseline.likeCount + records.filter((record) => record.likedPostIds.has(postId)).length,
+      commentCount: comments.length,
+      sendCount: baseline.sendCount + records.filter((record) => record.sentPostIds.has(postId)).length,
+      saveCount: baseline.saveCount + records.filter((record) => record.savedPostIds.has(postId)).length,
+      viewer: {
+        liked: Boolean(viewer?.likedPostIds.has(postId)),
+        saved: Boolean(viewer?.savedPostIds.has(postId)),
+        sent: Boolean(viewer?.sentPostIds.has(postId)),
+        following: Boolean(viewer?.followedAccountIds.has(accountId)),
+      },
+    }
+  }
+
+  listMovementFeed({ actor = null, sponsorCode = 'LUZIONE', sort = 'TRENDING' } = {}) {
+    const code = required(sponsorCode, 'sponsorCode', 80).toUpperCase()
+    if (!this.organizations.has(code)) throw new AllocationError('SPONSOR_NOT_FOUND', 'sponsor not found', 404)
+    if (actor) this.authorize(actor, code, 'VIEW')
+
+    const proofPosts = [...this.mediaEvents.values()]
+      .filter((event) => event.status === 'PUBLISHED' && this.campaigns.get(event.campaignId)?.sponsorCode === code)
+      .map((event) => {
+        const brand = this.brandVersions.get(event.brandVersionId)
+        const accountId = 'brand:' + brand.brandVersionId
+        const postId = 'proof:' + event.mediaEventId
+        return {
+          postId,
+          kind: 'VERIFIED_SUPPORT',
+          account: {
+            accountId,
+            displayName: brand.displayName,
+            handle: brand.displayName.toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 40) || 'luzione',
+            avatarText: brand.displayName.slice(0, 1).toUpperCase(),
+            verifiedSponsor: true,
+          },
+          location: event.generalizedRegion,
+          headline: event.headline,
+          caption: event.summary,
+          mediaItems: [{
+            mediaId: 'verified:' + event.mediaEventId,
+            fileName: event.publicCaseCode.toLowerCase() + '-verified-outcome.jpg',
+            mimeType: 'image/jpeg',
+            altText: event.headline,
+            storageState: 'FEP_VERIFIED_PROJECTION',
+          }],
+          mediaPresentation: 'VERIFIED_OUTCOME',
+          publicCaseCode: event.publicCaseCode,
+          createdAt: event.occurredAt,
+          lifecycleState: event.lifecycleState,
+          verification: {
+            status: event.lifecycleState === 'OUTCOME_CONFIRMED' ? 'VERIFIED_OUTCOME' : 'VERIFIED_PROGRESS',
+            label: event.lifecycleState === 'OUTCOME_CONFIRMED' ? 'Outcome confirmed' : friendlyLifecycle(event.lifecycleState),
+            acknowledgement: 'FEP receipt verified and publication consent recorded',
+            requirements: ['Masked identity', 'Exact lifecycle state', 'Separate publication consent'],
+          },
+          funding: {
+            amountMinor: event.amountMinor,
+            currency: event.currency,
+            sponsorDisplayName: event.attributionMode === 'ANONYMOUS' ? null : brand.displayName,
+          },
+          comments: [...this.movementComments.values()]
+            .filter((comment) => comment.postId === postId)
+            .sort((left, right) => left.createdAt.localeCompare(right.createdAt))
+            .map(movementCommentPublicView),
+          engagement: this.movementEngagement(postId, accountId, actor, 'VERIFIED_SUPPORT'),
+        }
+      })
+
+    const voluntaryPosts = [...this.movementPosts.values()]
+      .filter((post) => post.sponsorCode === code && post.status === 'PUBLISHED')
+      .map((post) => ({
+        postId: post.postId,
+        kind: 'VOLUNTARY_UPDATE',
+        account: { ...post.account },
+        location: post.location,
+        headline: null,
+        caption: post.caption,
+        mediaItems: post.mediaItems.map((item) => ({ ...item })),
+        mediaPresentation: post.mediaItems.length > 1
+          ? 'SLIDESHOW'
+          : post.mediaItems[0].mimeType.startsWith('video/') ? 'VIDEO' : 'PHOTO',
+        publicCaseCode: post.publicCaseCode,
+        createdAt: post.createdAt,
+        lifecycleState: null,
+        verification: {
+          status: post.publicCaseCode ? 'LINKED_VOLUNTARY_UPDATE' : 'VOLUNTARY_UPDATE',
+          label: post.publicCaseCode ? 'Linked to a public case code' : 'Community update',
+          acknowledgement: 'Author publication consent recorded',
+          requirements: ['Account attribution', 'Public-safe content scan', 'Publication consent'],
+        },
+        funding: null,
+        comments: [...this.movementComments.values()]
+          .filter((comment) => comment.postId === post.postId)
+          .sort((left, right) => left.createdAt.localeCompare(right.createdAt))
+          .map(movementCommentPublicView),
+        engagement: this.movementEngagement(post.postId, post.account.accountId, actor, 'VOLUNTARY_UPDATE'),
+      }))
+
+    const posts = [...proofPosts, ...voluntaryPosts]
+    const normalizedSort = String(sort).toUpperCase()
+    if (normalizedSort === 'LATEST') posts.sort((left, right) => right.createdAt.localeCompare(left.createdAt))
+    else if (normalizedSort === 'FOLLOWING' && actor) {
+      const viewer = this.movementInteractionRecord(actor)
+      posts.sort((left, right) => Number(viewer.followedAccountIds.has(right.account.accountId)) - Number(viewer.followedAccountIds.has(left.account.accountId)) || right.createdAt.localeCompare(left.createdAt))
+    } else {
+      posts.sort((left, right) => {
+        const rightScore = right.engagement.likeCount + (right.engagement.commentCount * 3) + (right.engagement.sendCount * 2)
+        const leftScore = left.engagement.likeCount + (left.engagement.commentCount * 3) + (left.engagement.sendCount * 2)
+        return rightScore - leftScore || right.createdAt.localeCompare(left.createdAt)
+      })
+    }
+    if (actor) this.auditEvent({ actor, sponsorCode: code, action: 'VIEW_MOVEMENT_FEED', resourceType: 'MOVEMENT_POST_LIST' })
+    return posts
+  }
+
+  createMovementPost(input) {
+    assertAllowedKeys(input, [
+      'actor', 'sponsorCode', 'displayName', 'handle', 'location', 'caption', 'mediaItems',
+      'publicCaseCode', 'publicationConsentVerified', 'idempotencyKey',
+    ], 'movement post')
+    const code = required(input.sponsorCode, 'sponsorCode', 80).toUpperCase()
+    this.authorize(input.actor, code, 'POST_MOVEMENT_UPDATE')
+    if (input.publicationConsentVerified !== true) {
+      throw new AllocationError('PUBLICATION_CONSENT_REQUIRED', 'movement updates require explicit publication consent')
+    }
+    if (!Array.isArray(input.mediaItems) || !input.mediaItems.length || input.mediaItems.length > 10) {
+      throw new AllocationError('MOVEMENT_MEDIA_REQUIRED', 'movement updates require 1-10 media items')
+    }
+    const mediaItems = input.mediaItems.map((item, index) => movementMediaItem(item, index))
+    const videoItems = mediaItems.filter((item) => item.mimeType.startsWith('video/'))
+    if (videoItems.length && (videoItems.length !== 1 || mediaItems.length !== 1)) {
+      throw new AllocationError('MOVEMENT_MEDIA_MIX_INVALID', 'a video post must contain exactly one video; slideshows contain images only')
+    }
+    const publicCaseCode = input.publicCaseCode ? required(input.publicCaseCode, 'publicCaseCode', 120) : null
+    if (publicCaseCode) {
+      const card = this.cards.get(publicCaseCode)
+      if (!card || card.status !== 'PUBLISHED') throw new AllocationError('CASE_NOT_AVAILABLE', 'linked public case code is not available', 409)
+    }
+    const account = {
+      accountId: 'movement_account_' + hash({ sponsorCode: code, subjectId: input.actor.subjectId }).slice(0, 20),
+      displayName: required(input.displayName, 'displayName', 80),
+      handle: movementHandle(input.handle),
+      avatarText: required(input.displayName, 'displayName', 80).slice(0, 1).toUpperCase(),
+      verifiedSponsor: false,
+    }
+    const command = {
+      sponsorCode: code,
+      account,
+      location: required(input.location, 'location', 120),
+      caption: required(input.caption, 'caption', 500),
+      mediaItems,
+      publicCaseCode,
+      publicationConsentVerified: true,
+    }
+    assertPublicSafe({
+      displayName: account.displayName,
+      handle: account.handle,
+      location: command.location,
+      caption: command.caption,
+      mediaText: mediaItems.map((item) => ({ fileName: item.fileName, altText: item.altText })),
+    }, 'movement post')
+    const idempotencyKey = required(input.idempotencyKey, 'idempotencyKey', 200)
+    const requestHash = hash(command)
+    const scopedKey = code + ':MOVEMENT_POST:' + idempotencyKey
+    const existing = this.idempotency.get(scopedKey)
+    if (existing) {
+      if (existing.requestHash !== requestHash) throw new AllocationError('IDEMPOTENCY_CONFLICT', 'idempotency key reused with different movement post', 409)
+      return { ...existing.response, idempotentReplay: true }
+    }
+    const post = {
+      postId: uid('movement_post'),
+      ...command,
+      status: 'PUBLISHED',
+      createdAt: this.now().toISOString(),
+      requestHash,
+    }
+    this.movementPosts.set(post.postId, post)
+    const response = this.listMovementFeed({ actor: input.actor, sponsorCode: code, sort: 'LATEST' })
+      .find((item) => item.postId === post.postId)
+    this.idempotency.set(scopedKey, { requestHash, response })
+    this.auditEvent({
+      actor: input.actor,
+      sponsorCode: code,
+      action: 'PUBLISH_MOVEMENT_UPDATE',
+      resourceType: 'MOVEMENT_POST',
+      resourceId: post.postId,
+      details: { publicCaseCode, mediaCount: mediaItems.length, mediaPresentation: response.mediaPresentation },
+    })
+    return response
+  }
+
+  createMovementComment(input) {
+    assertAllowedKeys(input, [
+      'actor', 'sponsorCode', 'postId', 'parentCommentId', 'displayName', 'handle', 'text', 'attachment',
+    ], 'movement comment')
+    const code = required(input.sponsorCode, 'sponsorCode', 80).toUpperCase()
+    this.authorize(input.actor, code, 'ENGAGE_MOVEMENT')
+    const postId = required(input.postId, 'postId', 200)
+    const post = this.listMovementFeed({ sponsorCode: code }).find((item) => item.postId === postId)
+    if (!post) throw new AllocationError('MOVEMENT_POST_NOT_FOUND', 'movement post not found', 404)
+    const parentCommentId = input.parentCommentId ? required(input.parentCommentId, 'parentCommentId', 200) : null
+    if (parentCommentId) {
+      const parent = this.movementComments.get(parentCommentId)
+      if (!parent || parent.postId !== postId) throw new AllocationError('MOVEMENT_COMMENT_PARENT_INVALID', 'comment thread parent is not available', 409)
+    }
+    const attachment = input.attachment ? movementMediaItem(input.attachment, 0, { imagesOnly: true }) : null
+    const comment = {
+      commentId: uid('movement_comment'),
+      sponsorCode: code,
+      postId,
+      parentCommentId,
+      account: {
+        accountId: 'movement_account_' + hash({ sponsorCode: code, subjectId: input.actor.subjectId }).slice(0, 20),
+        displayName: required(input.displayName, 'displayName', 80),
+        handle: movementHandle(input.handle),
+        avatarText: required(input.displayName, 'displayName', 80).slice(0, 1).toUpperCase(),
+      },
+      text: required(input.text, 'text', 400),
+      attachment,
+      createdAt: this.now().toISOString(),
+    }
+    assertPublicSafe({
+      displayName: comment.account.displayName,
+      handle: comment.account.handle,
+      text: comment.text,
+      attachmentText: attachment ? { fileName: attachment.fileName, altText: attachment.altText } : null,
+    }, 'movement comment')
+    this.movementComments.set(comment.commentId, comment)
+    this.auditEvent({ actor: input.actor, sponsorCode: code, action: 'CREATE_MOVEMENT_COMMENT', resourceType: 'MOVEMENT_COMMENT', resourceId: comment.commentId, details: { postId, parentCommentId } })
+    return movementCommentPublicView(comment)
+  }
+
+  toggleMovementInteraction(input) {
+    assertAllowedKeys(input, ['actor', 'sponsorCode', 'postId', 'accountId', 'action'], 'movement interaction')
+    const code = required(input.sponsorCode, 'sponsorCode', 80).toUpperCase()
+    this.authorize(input.actor, code, 'ENGAGE_MOVEMENT')
+    const postId = required(input.postId, 'postId', 200)
+    const post = this.listMovementFeed({ sponsorCode: code }).find((item) => item.postId === postId)
+    if (!post) throw new AllocationError('MOVEMENT_POST_NOT_FOUND', 'movement post not found', 404)
+    const action = required(input.action, 'action', 20).toUpperCase()
+    if (!MOVEMENT_INTERACTIONS.has(action)) throw new AllocationError('MOVEMENT_INTERACTION_INVALID', 'interaction must be LIKE, SAVE, SEND, or FOLLOW')
+    const record = this.movementInteractionRecord(input.actor)
+    let active = true
+    if (action === 'FOLLOW') {
+      const accountId = required(input.accountId, 'accountId', 200)
+      if (accountId !== post.account.accountId) throw new AllocationError('MOVEMENT_ACCOUNT_MISMATCH', 'follow target does not match the post account', 409)
+      if (record.followedAccountIds.has(accountId)) {
+        record.followedAccountIds.delete(accountId)
+        active = false
+      } else record.followedAccountIds.add(accountId)
+    } else {
+      const collection = action === 'LIKE'
+        ? record.likedPostIds
+        : action === 'SAVE' ? record.savedPostIds : record.sentPostIds
+      if (action !== 'SEND' && collection.has(postId)) {
+        collection.delete(postId)
+        active = false
+      } else collection.add(postId)
+    }
+    this.auditEvent({ actor: input.actor, sponsorCode: code, action: action + '_MOVEMENT_POST', resourceType: 'MOVEMENT_POST', resourceId: postId })
+    return { postId, action, active }
+  }
+
+  getSupportLedger({ actor, sponsorCode }) {
+    const code = required(sponsorCode, 'sponsorCode', 80).toUpperCase()
+    this.authorize(actor, code, 'VIEW')
+    const entries = [...this.sponsoredOutcomeRequests.values()]
+      .filter((request) => request.sponsorCode === code)
+      .map((request) => {
+        const campaign = this.campaigns.get(request.campaignId)
+        const media = [...this.mediaEvents.values()].find((event) =>
+          event.publicCaseCode === request.publicCaseCode && event.campaignId === request.campaignId && event.status === 'PUBLISHED'
+        )
+        return {
+          ledgerEntryId: 'ledger:' + request.sponsoredOutcomeRequestId,
+          publicCaseCode: request.publicCaseCode,
+          campaignName: campaign?.name ?? request.campaignId,
+          amountMinor: request.amountMinor,
+          currency: request.currency,
+          recordedAt: request.createdAt,
+          currentState: media?.lifecycleState ?? request.status,
+          receiptAcknowledgement: request.status === 'ACCEPTED_BY_FEP_NO_EFFECT'
+            ? 'FEP accepted the request; this G0 build made no payment or provider effect.'
+            : 'Awaiting or reflecting FEP disposition.',
+          validationRequirements: [
+            { label: 'Exact public amount', status: 'PASS' },
+            { label: 'Masked identity', status: 'PASS' },
+            { label: 'No publicity condition', status: 'PASS' },
+            { label: 'FEP disposition', status: request.status === 'ACCEPTED_BY_FEP_NO_EFFECT' ? 'PASS' : 'PENDING' },
+          ],
+          optionalPublicPosting: media ? 'PUBLISHED_WITH_SEPARATE_CONSENT' : 'NOT_POSTED',
+          effectMode: 'DISABLED',
+        }
+      })
+      .sort((left, right) => right.recordedAt.localeCompare(left.recordedAt))
+    this.auditEvent({ actor, sponsorCode: code, action: 'VIEW_SUPPORT_LEDGER', resourceType: 'SUPPORT_LEDGER' })
+    return entries
+  }
+
+  getPriorityQueue({ actor, sponsorCode, programId }) {
+    const code = required(sponsorCode, 'sponsorCode', 80).toUpperCase()
+    this.authorize(actor, code, 'VIEW')
+    const program = this.programs.get(programId)
+    if (!program || program.sponsorCode !== code || program.status !== 'ACTIVE') {
+      throw new AllocationError('PROGRAM_ACCESS_DENIED', 'program not visible', 403)
+    }
+    const queue = [...this.cards.values()]
+      .filter((card) => card.status === 'PUBLISHED' && program.allowedCategories.includes(card.category))
+      .map((card, index) => ({
+        maskedCaseId: 'FEP-' + hash({ publicCode: card.publicCode }).slice(0, 8).toUpperCase(),
+        publicCaseCode: card.publicCode,
+        needCategory: card.category,
+        needSummary: card.summary,
+        generalizedRegion: card.generalizedRegion,
+        requestedAmountMinor: card.requestedAmountMinor,
+        currency: card.currency,
+        necessityBand: index === 0 ? 'IMMEDIATE' : 'NEAR_TERM',
+        queuePosition: index + 1,
+        prioritizationState: index === 0 ? 'FEP_REVIEWED_READY' : 'AWAITING_CAPACITY_REVIEW',
+        priorityFactors: index === 0
+          ? ['START_DATE_PROXIMITY', 'REQUIRED_SAFETY_EQUIPMENT', 'VERIFIED_WORK_CONTEXT']
+          : ['TRANSPORT_CONTINUITY', 'FIRST_MONTH_OF_WORK', 'VERIFIED_WORK_CONTEXT'],
+        identityExposure: 'MASKED',
+        selectionAuthority: 'FEP_HUMAN_REVIEW',
+        sultanRole: 'DECISION_SUPPORT_ONLY',
+        sponsorCanSelectPerson: false,
+      }))
+      .sort((left, right) => left.queuePosition - right.queuePosition)
+    this.auditEvent({ actor, sponsorCode: code, action: 'VIEW_PRIORITY_QUEUE', resourceType: 'FEP_PRIORITY_QUEUE', resourceId: programId })
+    return queue
+  }
+
+  getPlatformStatus({ actor, sponsorCode }) {
+    const code = required(sponsorCode, 'sponsorCode', 80).toUpperCase()
+    this.authorize(actor, code, 'VIEW')
+    const impactRecords = [...this.impact.values()].filter((projection) =>
+      this.programs.get(projection.programId)?.sponsorCode === code && !projection.suppressed
+    )
+    const proofEvents = [...this.mediaEvents.values()].filter((event) =>
+      event.status === 'PUBLISHED' && this.campaigns.get(event.campaignId)?.sponsorCode === code
+    )
+    const today = this.now().toISOString().slice(0, 10)
+    const todayEvents = proofEvents.filter((event) => event.occurredAt.startsWith(today))
+    const overall = impactRecords.reduce((totals, projection) => ({
+      acceptedAllocationMinor: totals.acceptedAllocationMinor + Number(projection.metrics.acceptedAllocationMinor ?? 0),
+      fulfilledCaseCount: totals.fulfilledCaseCount + Number(projection.metrics.fulfilledCaseCount ?? 0),
+      verifiedOutcomeCount: totals.verifiedOutcomeCount + Number(projection.metrics.verifiedOutcomeCount ?? 0),
+    }), { acceptedAllocationMinor: 0, fulfilledCaseCount: 0, verifiedOutcomeCount: 0 })
+    const result = {
+      visibility: 'INTERNAL_FEP_OS',
+      overallImpact: { ...overall, currency: this.organizations.get(code).currency },
+      dailyImpact: {
+        date: today,
+        verifiedFeedEvents: todayEvents.length,
+        confirmedOutcomes: todayEvents.filter((event) => event.lifecycleState === 'OUTCOME_CONFIRMED').length,
+        acknowledgedAmountMinor: todayEvents.reduce((total, event) => total + event.amountMinor, 0),
+        currency: this.organizations.get(code).currency,
+      },
+      governance: {
+        verifiedReceiptCount: this.fepReceipts.size,
+        publicEventsWithConsent: proofEvents.length,
+        withdrawnPublicEvents: [...this.mediaEvents.values()].filter((event) => event.status === 'WITHDRAWN').length,
+        auditEventCount: this.audit.filter((event) => event.sponsorCode === code).length,
+        namedRecipientSelection: false,
+        rawEvidenceInPublicApp: false,
+      },
+      systemHealth: [
+        { system: 'Allocation command integrity', status: 'VERIFIED_IN_CI', detail: 'Deterministic and durable replay proof is enforced.' },
+        { system: 'FEP receipt verification', status: 'SIMULATED_PASS', detail: 'Signed-fixture verification is active; live FEP verification remains an integration gate.' },
+        { system: 'Identity masking and consent', status: 'PASS', detail: 'Public projections expose case codes and generalized regions only.' },
+        { system: 'Durable post media', status: 'NOT_CONNECTED', detail: 'Photo and video selection works as a local preview; durable object storage is not configured.' },
+        { system: 'Money and provider effects', status: 'DISABLED', detail: 'No settlement, gift-card, merchant, or provider effect is enabled in G0.' },
+      ],
+      evaluations: [
+        { name: 'B07 deterministic allocation', status: 'PASS', evidence: 'Exact payload, snapshot, allocation, and adapter hashes.' },
+        { name: 'Concurrent durable delivery', status: 'PASS', evidence: 'One effect and replay-safe duplicates under concurrent delivery.' },
+        { name: 'Public data boundary', status: 'PASS', evidence: 'PII, named-recipient, financial-promise, and misleading charitable-claim checks.' },
+        { name: 'Rendered browser walkthrough', status: 'PENDING', evidence: 'Requires a discoverable hosted preview or browser runtime.' },
+      ],
+      knowledge: [
+        { title: 'Program operating model', state: 'CURRENT', summary: 'Luzione app publishes consented movement media; FEP OS governs identity, priority, allocation, receipts, and proof.' },
+        { title: 'Recipient selection authority', state: 'BOUNDARY', summary: 'Sponsors choose an approved program, reviewed cohort, or public case code. FEP retains the hidden-person decision.' },
+        { title: 'Value system', state: 'BOUNDARY', summary: 'Impact Points are recognition only. Essentials Credits remain a future funded, closed-loop access instrument.' },
+        { title: 'Production gates', state: 'OPEN', summary: 'Live identity, durable database and media, settlement provider, funded inventory, legal review, and pilot operations.' },
+      ],
+    }
+    this.auditEvent({ actor, sponsorCode: code, action: 'VIEW_PLATFORM_STATUS', resourceType: 'FEP_PLATFORM_STATUS' })
+    return result
   }
 
   consumeFepReceipt(receipt, { contractVersion, resourceType, resourceId, payload }) {

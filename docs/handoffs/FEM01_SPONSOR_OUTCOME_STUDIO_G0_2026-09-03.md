@@ -27,6 +27,19 @@ The Allocation portal is now a Luzione **Sponsor Outcome Studio** with these bou
 
 The demo contains one reconciled confirmed outcome and one available outcome whose sponsor action produces a review request. All mutations remain `effectMode: DISABLED`.
 
+### UI follow-on implemented from `FEP Thoughts(1).docx`
+
+- separated the public Luzione app, sponsor workspace, and explicitly internal FEP OS;
+- made the public movement feed the default view, with Trending as the main order and Latest/Following alternatives;
+- added Happy Moments horizontal reels, account/location headers, captions under media, and an 88%-width square image treatment;
+- added local photo, image-slideshow, and single-video selection with previews and strict metadata validation;
+- added heart, X-style threaded/photo comments, send, bookmark, and follow interactions, with no repost action;
+- combined verified FEP support posts and clearly differentiated voluntary updates in one continuously growing feed;
+- added an internal support ledger with receipt acknowledgement, validation requirements, lifecycle state, and optional-posting status;
+- added a masked priority queue for generalized needs, immediacy bands, and policy-safe factors, with Sultan explicitly limited to decision support and FEP human review authoritative;
+- added overall/daily impact, system-by-system health, evaluation evidence, governance metrics, and a living program-knowledge panel;
+- kept recipient identity, exact need evidence, urgency/prioritization logic, and authority outside the public app.
+
 ## Value and crypto boundary
 
 - **Luzione Impact Points** have no monetary value, transfer, redemption, eligibility influence, or future-conversion entitlement.
@@ -41,6 +54,9 @@ The demo contains one reconciled confirmed outcome and one available outcome who
 - `luzione-sponsor-brand-version-v0.1-draft`
 - `luzione-sponsor-campaign-v0.1-draft`
 - `luzione-sponsored-outcome-request-v0.1-draft`
+- `luzione-movement-post-v0.1-draft`
+- `luzione-movement-comment-v0.1-draft`
+- `luzione-movement-interaction-v0.1-draft`
 - `fep-sponsor-brand-review-v1`
 - `fep-sponsor-campaign-disposition-v1`
 - `fep-sponsored-outcome-request-disposition-v1`
@@ -71,7 +87,7 @@ The file store uses an exclusive command lock, immutable input/receipt hashes, a
 
 ## Verification
 
-- `npm run check` — pass: syntax validation and 72/72 tests after merging the newer durable B03 candidate.
+- Equivalent build/test checks — pass: JavaScript syntax validation and 80/80 tests after the movement-media and internal FEP OS UI follow-on.
 - `npm run proof:b07` — pass: exact pins, deterministic hashes, balanced 600-minor-unit fixture, durable concurrent replay, and zero-effect diagnostics.
 - HTTP startup/mutation suite — pass: home/security headers, health, brand and campaign drafts, campaign submit, direct-outcome creation/replay, proof feed, settings, and prohibited financial copy.
 - Static UI contract — pass: unique IDs, closed navigation targets, explicit button behavior, global loading/error status, text-only rendering, API wiring, Luzione-only naming, keyboard focus, three responsive breakpoints, and reduced-motion behavior.
@@ -95,7 +111,7 @@ This branch has no external effect or production mutation. Repository rollback i
 
 1. A02/B03 controller G1 acceptance remains external to this repository.
 2. Live authenticated FEP brand, campaign, availability, disposition, media, balance, and impact integrations do not exist here.
-3. Production identity, transactional Postgres, asset storage/scanning, restricted funds, refunds/reversals, merchant settlement, and reconciliation remain unimplemented.
+3. Production identity, transactional Postgres, durable post/comment storage, object storage/scanning/moderation, restricted funds, refunds/reversals, merchant settlement, and reconciliation remain unimplemented.
 4. Legal, tax, accounting, privacy, payments, custody, sanctions, accessibility, content, support, incident-response, and pilot operating approvals are required.
 5. Rendered desktop/mobile browser verification and a recoverable preview deployment are still required.
 6. Points/credits issuance and every crypto behavior remain blocked; no future conversion may be promised.

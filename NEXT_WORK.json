@@ -1,8 +1,8 @@
 {
   "repository": "CIBOTFLOW/Luzione-FEP-Allocation",
-  "version": "0.7.0-draft",
+  "version": "0.8.0-draft",
   "effect_posture": "NO_EFFECT",
-  "public_product": "Luzione Sponsor Outcome Studio",
+  "public_product": "Luzione movement media plus Sponsor Outcome Studio; FEP OS remains internal",
   "work": [
     {"id":"ALLOC-501","status":"DONE","title":"Pin shared public-safe contracts"},
     {"id":"ALLOC-502","status":"DONE","title":"Implement responsive sponsor application shell"},
@@ -18,6 +18,10 @@
     {"id":"ALLOC-514","status":"DONE_G0","title":"Add capped campaigns and privacy-safe public-code outcome requests"},
     {"id":"ALLOC-515","status":"DONE_G0","title":"Add consented verified-outcome media lifecycle and proof feed"},
     {"id":"ALLOC-516","status":"DONE_SPEC_G0","title":"Enforce Impact Points and Essentials Credits closed-loop boundaries","remaining":"no issuance, spend, settlement, or reserve ledger is implemented"},
+    {"id":"ALLOC-519","status":"DONE_G0","title":"Separate public movement app, sponsor workspace, and internal FEP OS"},
+    {"id":"ALLOC-520","status":"DONE_G0","title":"Add photo/video/slideshow posts, Happy Moments, social engagement, and threaded photo comments","remaining":"durable media, moderation, and cross-device persistence"},
+    {"id":"ALLOC-521","status":"DONE_G0","title":"Add internal support ledger, masked priority queue, system health, evaluations, and program knowledge","remaining":"live FEP priority and operational-health integrations"},
+    {"id":"ALLOC-522","status":"READY_AFTER_IDENTITY","title":"Add durable movement-media storage, moderation, consent withdrawal, and deletion","dependencies":["ALLOC-503","ALLOC-510"]},
     {"id":"ALLOC-510","status":"READY","title":"Replace in-memory FEP projections with authenticated live FEP APIs","dependencies":["ALLOC-503","ALLOC-512","ALLOC-513","ALLOC-514","ALLOC-515"]},
     {"id":"ALLOC-517","status":"READY_AFTER_AUTHORITY","title":"Implement restricted funds, refunds, reversals, merchant settlement, and reconciliation","dependencies":["ALLOC-503","ALLOC-510"],"blocker":"approved custody and payment-provider architecture"},
     {"id":"ALLOC-518","status":"BLOCKED_BY_HUMAN_AUTHORITY","title":"Run capped Sponsor Outcome pilot","blocker":"legal, accounting, tax, privacy, access-policy, content, and operational approval"},
