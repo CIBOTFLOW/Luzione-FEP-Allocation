@@ -12,14 +12,14 @@
       "luzione-receipt-envelope/v0.2-draft.1",
       "luzione-readback-envelope/v0.2-draft.1"
     ],
-    "fep": "CIBOTFLOW/FEP-Platform@5e9b64528c536b9a5b6b283422a171438f09dd48",
+    "fep": "CIBOTFLOW/FEP-Platform@526e513b0698c56fefbf5b5918bb025df73e8e9e",
     "fepJournalContract": "fep-balanced-journal/v0.1-draft"
   },
   "fixtureVectors": {
-    "payloadHash": "0e00851a4e72762aa9389d84dd6a748d387685c7fbb89f26c0b5265d1ebc7b2b",
-    "innerSnapshotHash": "26a2d6443abff1acd68745f5adf787b4b1109ea68f9c257c0156f9d45ba0599c",
-    "allocationReceiptHash": "55c61b8bd5db03be3939b3a8a0f41bb41238c4c9a61088f48803b462e57d3384",
-    "adapterReceiptHash": "2518bbcaad60c80f72fddc6cd2f2abe9df4025604871c37cef08581d9030b61c"
+    "payloadHash": "6af94c7d23c318abddd17319309c9f524a00f7218d3f6d886793f567c4b61169",
+    "innerSnapshotHash": "77205f99b1b2981d0111f229a18655c68b8522f97424d99d62c7a972f1a337df",
+    "allocationReceiptHash": "2df167dfdd621bcacccc30f8a7a4ca0f2e17058c5d825347f2c1ef96449d1df5",
+    "adapterReceiptHash": "202aa0f9e435b96491287cf789fc5fb4b1e4b65078443c3c635919927f9b5c8f"
   },
   "balance": {
     "requestedMinor": 600,
@@ -37,6 +37,24 @@
     "runtimeActivation": false,
     "productionMigration": false
   },
+  "durableReplay": {
+    "contractVersion": "luzione-fep-allocation-command-store/v0.1-draft",
+    "attempts": 24,
+    "simulated": 1,
+    "replayed": 23,
+    "durableRecordCount": 1,
+    "commandKeyHash": "40704175d8bfbf53a0b657b98671f87c14d30a1da7414dc354b529aa700f6fae",
+    "receiptHash": "202aa0f9e435b96491287cf789fc5fb4b1e4b65078443c3c635919927f9b5c8f",
+    "effectMode": "DISABLED",
+    "scope": "FILE_BACKED_G0_REHEARSAL"
+  },
+  "blockers": [
+    "A02_G1_NOT_ACCEPTED",
+    "B03_G1_NOT_ACCEPTED",
+    "PRODUCTION_TRANSACTIONAL_STORE_NOT_IMPLEMENTED",
+    "LIVE_FEP_INTEGRATION_NOT_RUN",
+    "PRODUCTION_G2_NOT_GRANTED"
+  ],
   "integrated": false,
   "productionReady": false
 }

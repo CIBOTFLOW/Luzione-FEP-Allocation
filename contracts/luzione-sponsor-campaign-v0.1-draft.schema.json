@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.luzione.example/luzione-sponsor-campaign-v0.1-draft.schema.json",
+  "title": "Luzione sponsor campaign draft command",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "brandVersionId", "fundingRail", "name", "publicSummary", "budgetMinor",
+    "perOutcomeCapMinor", "currency", "allowedCategories", "allowedRegions",
+    "startsAt", "endsAt", "attributionMode", "acknowledgements"
+  ],
+  "properties": {
+    "brandVersionId": {"type": "string", "minLength": 1, "maxLength": 160},
+    "fundingRail": {"enum": ["MERCHANT_FUNDED_OUTCOME", "SPONSORED_DIRECT_GIFT", "GOVERNED_PROGRAM_SUPPORT"]},
+    "programId": {"type": ["string", "null"], "maxLength": 160},
+    "name": {"type": "string", "minLength": 1, "maxLength": 180},
+    "publicSummary": {"type": "string", "minLength": 1, "maxLength": 500},
+    "budgetMinor": {"type": "integer", "minimum": 1},
+    "perOutcomeCapMinor": {"type": "integer", "minimum": 1},
+    "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+    "allowedCategories": {
+      "type": "array", "minItems": 1, "maxItems": 20, "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1, "maxLength": 120}
+    },
+    "allowedRegions": {
+      "type": "array", "maxItems": 20, "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1, "maxLength": 120}
+    },
+    "startsAt": {"type": "string", "format": "date-time"},
+    "endsAt": {"type": "string", "format": "date-time"},
+    "attributionMode": {"enum": ["SPONSOR_NAME_AND_TAGLINE", "SPONSOR_NAME_ONLY", "ANONYMOUS"]},
+    "acknowledgements": {"$ref": "#/$defs/directGiftAcknowledgements"}
+  },
+  "$defs": {
+    "directGiftAcknowledgements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nonCharitableAcknowledged", "noRecipientContact", "noPublicityCondition", "noCashOutOrExchange"],
+      "properties": {
+        "nonCharitableAcknowledged": {"type": "boolean"},
+        "noRecipientContact": {"type": "boolean"},
+        "noPublicityCondition": {"type": "boolean"},
+        "noCashOutOrExchange": {"type": "boolean"}
+      }
+    }
+  }
+}

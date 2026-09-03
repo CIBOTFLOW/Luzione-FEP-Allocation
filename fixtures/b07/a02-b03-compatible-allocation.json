@@ -56,8 +56,8 @@
           },
           "funding": {
             "contractVersion": "fep-balanced-journal/v0.1-draft",
-            "producerSha": "5e9b64528c536b9a5b6b283422a171438f09dd48",
-            "schemaSha256": "5023cebce38e4bb43a7372aad85bc457c48d9adf62b8ab9ab3d02a26ac0a54c4",
+            "producerSha": "526e513b0698c56fefbf5b5918bb025df73e8e9e",
+            "schemaSha256": "ddca46acc4501ed1a60a61c0eaaddd431efd02f9b945b2b1ffb3a7f3163192fb",
             "journalHeadHash": "3333333333333333333333333333333333333333333333333333333333333333",
             "sourceReceiptHash": "4444444444444444444444444444444444444444444444444444444444444444",
             "availableMinor": 600,
@@ -94,7 +94,7 @@
           ]
         }
       },
-      "payloadHash": "0e00851a4e72762aa9389d84dd6a748d387685c7fbb89f26c0b5265d1ebc7b2b",
+      "payloadHash": "6af94c7d23c318abddd17319309c9f524a00f7218d3f6d886793f567c4b61169",
       "policyVersionRefs": ["fep-policy-rules-v1"],
       "requestedAt": "2026-09-03T03:28:00.000Z",
       "requestedEffect": {
@@ -118,7 +118,7 @@
       "effectAuthority": "NOT_GRANTED_BY_CONTRACT",
       "idempotency": {
         "key": "idem-b07-synthetic-1",
-        "payloadHash": "0e00851a4e72762aa9389d84dd6a748d387685c7fbb89f26c0b5265d1ebc7b2b",
+        "payloadHash": "6af94c7d23c318abddd17319309c9f524a00f7218d3f6d886793f567c4b61169",
         "replay": false
       },
       "object": {
@@ -161,9 +161,9 @@
   },
   "now": "2026-09-03T03:30:00.000Z",
   "expected": {
-    "payloadHash": "0e00851a4e72762aa9389d84dd6a748d387685c7fbb89f26c0b5265d1ebc7b2b",
-    "innerSnapshotHash": "26a2d6443abff1acd68745f5adf787b4b1109ea68f9c257c0156f9d45ba0599c",
-    "allocationReceiptHash": "55c61b8bd5db03be3939b3a8a0f41bb41238c4c9a61088f48803b462e57d3384",
-    "adapterReceiptHash": "2518bbcaad60c80f72fddc6cd2f2abe9df4025604871c37cef08581d9030b61c"
+    "payloadHash": "6af94c7d23c318abddd17319309c9f524a00f7218d3f6d886793f567c4b61169",
+    "innerSnapshotHash": "77205f99b1b2981d0111f229a18655c68b8522f97424d99d62c7a972f1a337df",
+    "allocationReceiptHash": "2df167dfdd621bcacccc30f8a7a4ca0f2e17058c5d825347f2c1ef96449d1df5",
+    "adapterReceiptHash": "202aa0f9e435b96491287cf789fc5fb4b1e4b65078443c3c635919927f9b5c8f"
   }
 }

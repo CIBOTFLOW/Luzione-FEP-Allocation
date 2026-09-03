@@ -5,6 +5,7 @@ import { URL } from 'node:url'
 
 import { AllocationError } from './canonical.js'
 import { createDemoAllocationService } from './bootstrap.js'
+import { LUZIONE_VALUE_BOUNDARY } from './luzioneValueBoundary.js'
 
 const ASSETS = new Map([
   ['/', { file: '../public/index.html', type: 'text/html; charset=utf-8' }],
@@ -103,7 +104,7 @@ export function createAllocationHttpServer({ service, defaults }) {
         return sendJson(response, 200, {
           status: 'ok',
           service: 'luzione-fep-allocation',
-          version: '0.6.0',
+          version: '0.7.0-draft',
           authoritative: false,
           authoritySource: 'FEP_PLATFORM_PROJECTION',
           namedRecipientSelection: false,
@@ -140,6 +141,34 @@ export function createAllocationHttpServer({ service, defaults }) {
           sponsorCode: actor.sponsorCode,
         }))
       }
+      if (request.method === 'GET' && url.pathname === '/v1/brand-versions') {
+        return sendJson(response, 200, service.listBrandVersions(context))
+      }
+      if (request.method === 'POST' && url.pathname === '/v1/brand-versions') {
+        const input = await readJson(request)
+        return sendJson(response, 201, service.registerBrandVersion({ ...input, actor, sponsorCode: actor.sponsorCode }))
+      }
+      if (request.method === 'GET' && url.pathname === '/v1/campaigns') {
+        return sendJson(response, 200, service.listCampaigns(context))
+      }
+      if (request.method === 'POST' && url.pathname === '/v1/campaigns') {
+        const input = await readJson(request)
+        return sendJson(response, 201, service.createCampaign({ ...input, actor, sponsorCode: actor.sponsorCode }))
+      }
+      if (request.method === 'POST' && /^\/v1\/campaigns\/[^/]+\/submit$/.test(url.pathname)) {
+        const campaignId = decodeURIComponent(url.pathname.split('/')[3])
+        return sendJson(response, 200, service.submitCampaign(actor, campaignId))
+      }
+      if (request.method === 'GET' && url.pathname === '/v1/sponsored-outcomes') {
+        return sendJson(response, 200, service.listSponsoredOutcomeRequests(context))
+      }
+      if (request.method === 'POST' && url.pathname === '/v1/sponsored-outcomes') {
+        const input = await readJson(request)
+        return sendJson(response, 201, service.createSponsoredOutcomeRequest({ ...input, actor, sponsorCode: actor.sponsorCode }))
+      }
+      if (request.method === 'GET' && url.pathname === '/v1/proof-feed') {
+        return sendJson(response, 200, service.listProofFeed(context))
+      }
       if (request.method === 'GET' && url.pathname === '/v1/impact') {
         return sendJson(response, 200, service.getImpact(context))
       }
@@ -154,11 +183,15 @@ export function createAllocationHttpServer({ service, defaults }) {
         return sendJson(response, 200, {
           sponsorCode: actor.sponsorCode,
           subjectId: actor.subjectId,
+          authoritySource: 'FEP_PLATFORM_PROJECTION',
           minimumCohortSize: service.minimumCohortSize,
           allocationTargets: ['PROGRAM', 'COHORT'],
+          specificOutcomeRail: 'PUBLIC_CASE_CODE_REQUIRES_FEP_REVIEW',
           namedRecipientSelection: false,
           rawEvidenceAccess: false,
           directMoneyMovement: false,
+          fundingRails: ['MERCHANT_FUNDED_OUTCOME', 'SPONSORED_DIRECT_GIFT', 'GOVERNED_PROGRAM_SUPPORT'],
+          valueBoundary: LUZIONE_VALUE_BOUNDARY,
           productionAuthenticationConfigured: Boolean(process.env.ALLOC_PORTAL_TOKENS_JSON?.trim()),
         })
       }

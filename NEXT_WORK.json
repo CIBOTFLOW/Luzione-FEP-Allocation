@@ -1,18 +1,26 @@
 {
   "repository": "CIBOTFLOW/Luzione-FEP-Allocation",
-  "version": "0.6.0",
+  "version": "0.7.0-draft",
   "effect_posture": "NO_EFFECT",
+  "public_product": "Luzione Sponsor Outcome Studio",
   "work": [
     {"id":"ALLOC-501","status":"DONE","title":"Pin shared public-safe contracts"},
-    {"id":"ALLOC-502","status":"DONE","title":"Implement responsive web application shell"},
+    {"id":"ALLOC-502","status":"DONE","title":"Implement responsive sponsor application shell"},
     {"id":"ALLOC-503","status":"REFERENCE_COMPLETE_LIVE_AUTH_BLOCKED","title":"Implement organization auth and sponsor access policies","blocker":"production IdP/session integration and live membership source"},
     {"id":"ALLOC-504","status":"DONE","title":"Implement program and FEP-reported available-allocation read models"},
     {"id":"ALLOC-505","status":"DONE","title":"Implement minimum-size reviewed cohort selector"},
-    {"id":"ALLOC-506","status":"DONE","title":"Implement public-safe case-card browser with no selectable recipient target"},
-    {"id":"ALLOC-507","status":"DONE","title":"Implement program/cohort allocation-intent creation, holds, and FEP status readback"},
+    {"id":"ALLOC-506","status":"DONE","title":"Implement public-safe case-card browser with no allocation target authority"},
+    {"id":"ALLOC-507","status":"DONE","title":"Implement program/cohort allocation-intent holds and FEP readback"},
     {"id":"ALLOC-508","status":"DONE","title":"Implement minimum-cohort aggregate reporting"},
     {"id":"ALLOC-509","status":"DONE","title":"Add tenant sponsor audit ledger"},
-    {"id":"ALLOC-510","status":"READY","title":"Replace in-memory FEP projections with authenticated live FEP APIs","dependencies":["ALLOC-503","ALLOC-506","ALLOC-507"]},
-    {"id":"ALLOC-511","status":"BLOCKED_BY_HUMAN_AUTHORITY","title":"Enable production sponsor allocation","blocker":"legal, accounting, privacy, access-policy, and live FEP authorization"}
+    {"id":"ALLOC-512","status":"DONE_G0","title":"Pin exact durable B03 producer and add concurrent replay persistence","remaining":"replace file rehearsal with transactional Postgres"},
+    {"id":"ALLOC-513","status":"DONE_G0","title":"Add immutable sponsor brand versions and FEP review projection"},
+    {"id":"ALLOC-514","status":"DONE_G0","title":"Add capped campaigns and privacy-safe public-code outcome requests"},
+    {"id":"ALLOC-515","status":"DONE_G0","title":"Add consented verified-outcome media lifecycle and proof feed"},
+    {"id":"ALLOC-516","status":"DONE_SPEC_G0","title":"Enforce Impact Points and Essentials Credits closed-loop boundaries","remaining":"no issuance, spend, settlement, or reserve ledger is implemented"},
+    {"id":"ALLOC-510","status":"READY","title":"Replace in-memory FEP projections with authenticated live FEP APIs","dependencies":["ALLOC-503","ALLOC-512","ALLOC-513","ALLOC-514","ALLOC-515"]},
+    {"id":"ALLOC-517","status":"READY_AFTER_AUTHORITY","title":"Implement restricted funds, refunds, reversals, merchant settlement, and reconciliation","dependencies":["ALLOC-503","ALLOC-510"],"blocker":"approved custody and payment-provider architecture"},
+    {"id":"ALLOC-518","status":"BLOCKED_BY_HUMAN_AUTHORITY","title":"Run capped Sponsor Outcome pilot","blocker":"legal, accounting, tax, privacy, access-policy, content, and operational approval"},
+    {"id":"ALLOC-511","status":"BLOCKED_BY_HUMAN_AUTHORITY","title":"Enable production sponsor allocation","blocker":"live FEP authorization, recovery drill, and production go/no-go"}
   ]
 }

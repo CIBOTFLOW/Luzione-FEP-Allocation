@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.luzione.example/luzione-sponsored-outcome-request-v0.1-draft.schema.json",
+  "title": "Luzione sponsored outcome request draft command",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "campaignId", "publicCaseCode", "amountMinor", "correlationId",
+    "idempotencyKey", "acknowledgements"
+  ],
+  "properties": {
+    "campaignId": {"type": "string", "minLength": 1, "maxLength": 160},
+    "publicCaseCode": {"type": "string", "minLength": 1, "maxLength": 120},
+    "amountMinor": {"type": "integer", "minimum": 1},
+    "rationale": {"type": ["string", "null"], "maxLength": 300},
+    "correlationId": {"type": "string", "minLength": 1, "maxLength": 200},
+    "idempotencyKey": {"type": "string", "minLength": 1, "maxLength": 200},
+    "acknowledgements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nonCharitableAcknowledged", "noRecipientContact", "noPublicityCondition", "noCashOutOrExchange"],
+      "properties": {
+        "nonCharitableAcknowledged": {"const": true},
+        "noRecipientContact": {"const": true},
+        "noPublicityCondition": {"const": true},
+        "noCashOutOrExchange": {"const": true}
+      }
+    }
+  }
+}
