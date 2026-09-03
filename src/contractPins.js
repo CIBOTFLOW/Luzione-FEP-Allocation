@@ -15,7 +15,8 @@ const apiArtifactSha256 = Object.freeze({
 })
 
 export const CONTRACT_PINS = Object.freeze({
-  controllerRelease: 'b626c665d14a7baf419ec2fef42b1ee98b66a370',
+  controllerRelease: '3a9c49fb3b7badb8a35eac1502e2ac3fb1be769c',
+  controllerEvidenceDecision: 'a4b85512f113ff15cfe689347d1c9de0edf98123',
   adapterContract: 'luzione-fep-allocation-simulation/v0.1-draft',
   receiptContract: 'luzione-fep-allocation-receipt/v0.1-draft',
   apiRepository: 'CIBOTFLOW/Luzione-API',
@@ -30,8 +31,8 @@ export const CONTRACT_PINS = Object.freeze({
   fepRepository: 'CIBOTFLOW/FEP-Platform',
   fepJournalContract: 'fep-balanced-journal/v0.1-draft',
   fepJournalProducerSha: '526e513b0698c56fefbf5b5918bb025df73e8e9e',
-  fepJournalPinSha256: '034f731158fbc77d1de46fcf18fb7d31dbca83cc28faec0ef8e3b6dcfa4aa726',
-  fepJournalSchemaSha256: 'ddca46acc4501ed1a60a61c0eaaddd431efd02f9b945b2b1ffb3a7f3163192fb',
+  fepJournalPinSha256: '939aa1c8337b2d18295c70a670b006cbc49137a46a46120fa27f420c00637fe6',
+  fepJournalSchemaSha256: '5023cebce38e4bb43a7372aad85bc457c48d9adf62b8ab9ab3d02a26ac0a54c4',
   fepJournalMigrationSha256: 'e13ea51c501bcc56825af0e7583ec0929d9f3d816acb232b6e2e234b7a299c0f',
   fepJournalRollbackSha256: '3b926e7c8602207d551d05efd03ee308af695e34aa09eeb034735f77d3bff583',
   fepPolicyContract: 'fep-policy-rules-v1',

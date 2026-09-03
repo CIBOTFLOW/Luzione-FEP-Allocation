@@ -46,13 +46,14 @@ No blockchain, token, wallet, exchange, treasury sale, or crypto repository is p
 
 ## B07 A02/B03 compatibility proof
 
-The isolated adapter pins:
+The isolated adapters pin controller release `3a9c49fb3b7badb8a35eac1502e2ac3fb1be769c` and evidence decision `a4b85512f113ff15cfe689347d1c9de0edf98123`, plus:
 
 - `CIBOTFLOW/Luzione-API@f2d643a0913b888809c217adfd9bdcef0385b05a` and exactly five `v0.2-draft.1` contracts and artifact digests;
 - `CIBOTFLOW/FEP-Platform@526e513b0698c56fefbf5b5918bb025df73e8e9e` and `fep-balanced-journal/v0.1-draft`;
-- exact producer receipt/readback identity, object, idempotency, evidence, balance, and currency fields.
+- exact A02 identity, command, receipt, and readback fields;
+- exact B03 journal transaction, append index, prior/head hash, balanced postings, durable receipt, replay readback, tenant, finality, balance, and currency fields.
 
-`DurableA02B03AllocationAdapter` adds a file-backed G0 command record with an exclusive claim lock, atomic fsync/rename, immutable replay, conflict denial, and record-integrity verification. This closes process-restart and concurrent replay in the rehearsal; it is not a substitute for transactional production Postgres.
+`A02B03AllocationAdapter` consumes the exact durable B03 disposable-Postgres evidence and serializes process-local compatibility claims. `DurableA02B03AllocationAdapter` additionally writes a file-backed G0 command record with an exclusive claim lock, atomic fsync/rename, immutable replay, conflict denial, and record-integrity verification. Together they cover B03 receipt/readback replay plus Allocation process restart and concurrent replay in the rehearsal; neither is a substitute for transactional production Postgres.
 
 The adapter is restricted to `DRAFT_ONLY`, `SYNTHETIC_ONLY`, and `NO_EFFECT`. It cannot write the FEP journal, move money, select a recipient, approve or deny, resolve an appeal, activate runtime behavior, or migrate production data.
 
@@ -109,4 +110,3 @@ Never put the token map, FEP credentials, receipt-verification keys, private cas
 6. A small capped pilot with explicit stop conditions and no public claim beyond verified readback.
 
 This release is G0, synthetic, and no-effect. It is neither integrated nor production-ready, and the design documentation is not legal advice.
-

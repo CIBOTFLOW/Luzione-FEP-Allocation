@@ -57,9 +57,64 @@
           "funding": {
             "contractVersion": "fep-balanced-journal/v0.1-draft",
             "producerSha": "526e513b0698c56fefbf5b5918bb025df73e8e9e",
-            "schemaSha256": "ddca46acc4501ed1a60a61c0eaaddd431efd02f9b945b2b1ffb3a7f3163192fb",
-            "journalHeadHash": "3333333333333333333333333333333333333333333333333333333333333333",
-            "sourceReceiptHash": "4444444444444444444444444444444444444444444444444444444444444444",
+            "pinSha256": "939aa1c8337b2d18295c70a670b006cbc49137a46a46120fa27f420c00637fe6",
+            "schemaSha256": "5023cebce38e4bb43a7372aad85bc457c48d9adf62b8ab9ab3d02a26ac0a54c4",
+            "migrationSha256": "e13ea51c501bcc56825af0e7583ec0929d9f3d816acb232b6e2e234b7a299c0f",
+            "rollbackSha256": "3b926e7c8602207d551d05efd03ee308af695e34aa09eeb034735f77d3bff583",
+            "journalTransaction": {
+              "schemaVersion": "fep-balanced-journal/v0.1-draft",
+              "transactionId": "txn-b03-funding-synthetic-1",
+              "sourceCode": "LUZIONE_API_A02",
+              "sourceEventId": "evt-b03-funding-synthetic-1",
+              "sourceEventHash": "7777777777777777777777777777777777777777777777777777777777777777",
+              "sourceSequence": 1,
+              "idempotencyKey": "idem-b03-funding-synthetic-1",
+              "correlationId": "corr-b07-synthetic-1",
+              "occurredAt": "2026-09-03T03:20:00.000Z",
+              "recordedAt": "2026-09-03T03:21:00.000Z",
+              "lifecycleState": "SETTLED",
+              "effectMode": "DISABLED",
+              "expectedPreviousHash": null,
+              "postings": [
+                {
+                  "entryId": "entry-b03-funding-debit-1",
+                  "accountId": "allocation-available",
+                  "direction": "DEBIT",
+                  "amountMinor": 600,
+                  "currency": "USD"
+                },
+                {
+                  "entryId": "entry-b03-funding-credit-1",
+                  "accountId": "funding-clearing",
+                  "direction": "CREDIT",
+                  "amountMinor": 600,
+                  "currency": "USD"
+                }
+              ]
+            },
+            "journalReceipt": {
+              "disposition": "APPENDED",
+              "tenantId": "tenant-acme",
+              "transactionId": "txn-b03-funding-synthetic-1",
+              "appendIndex": 1,
+              "previousTransactionHash": null,
+              "transactionHash": "053ff2a4c79a6ca031bde5d2e5bf28d8966b1cdd59ca647b5e40965296d22c81",
+              "effectMode": "NO_EFFECT"
+            },
+            "journalReadback": {
+              "tenantId": "tenant-acme",
+              "valid": true,
+              "transactionCount": 1,
+              "headHash": "053ff2a4c79a6ca031bde5d2e5bf28d8966b1cdd59ca647b5e40965296d22c81",
+              "balances": {
+                "allocation-available:USD": 600,
+                "funding-clearing:USD": -600
+              },
+              "effectMode": "NO_EFFECT"
+            },
+            "journalHeadHash": "053ff2a4c79a6ca031bde5d2e5bf28d8966b1cdd59ca647b5e40965296d22c81",
+            "sourceReceiptHash": "053ff2a4c79a6ca031bde5d2e5bf28d8966b1cdd59ca647b5e40965296d22c81",
+            "availableBalanceKey": "allocation-available:USD",
             "availableMinor": 600,
             "currency": "USD",
             "asOf": "2026-09-03T03:25:00.000Z"
@@ -94,7 +149,7 @@
           ]
         }
       },
-      "payloadHash": "6af94c7d23c318abddd17319309c9f524a00f7218d3f6d886793f567c4b61169",
+      "payloadHash": "52cf0acda564cec8508d1d1752906a6fdd511009ae4b472a844527f383dc2db1",
       "policyVersionRefs": ["fep-policy-rules-v1"],
       "requestedAt": "2026-09-03T03:28:00.000Z",
       "requestedEffect": {
@@ -118,7 +173,7 @@
       "effectAuthority": "NOT_GRANTED_BY_CONTRACT",
       "idempotency": {
         "key": "idem-b07-synthetic-1",
-        "payloadHash": "6af94c7d23c318abddd17319309c9f524a00f7218d3f6d886793f567c4b61169",
+        "payloadHash": "52cf0acda564cec8508d1d1752906a6fdd511009ae4b472a844527f383dc2db1",
         "replay": false
       },
       "object": {
@@ -161,9 +216,9 @@
   },
   "now": "2026-09-03T03:30:00.000Z",
   "expected": {
-    "payloadHash": "6af94c7d23c318abddd17319309c9f524a00f7218d3f6d886793f567c4b61169",
-    "innerSnapshotHash": "77205f99b1b2981d0111f229a18655c68b8522f97424d99d62c7a972f1a337df",
-    "allocationReceiptHash": "2df167dfdd621bcacccc30f8a7a4ca0f2e17058c5d825347f2c1ef96449d1df5",
-    "adapterReceiptHash": "202aa0f9e435b96491287cf789fc5fb4b1e4b65078443c3c635919927f9b5c8f"
+    "payloadHash": "52cf0acda564cec8508d1d1752906a6fdd511009ae4b472a844527f383dc2db1",
+    "innerSnapshotHash": "e3f42958b35015a32f3f75ba0899a41f967f09363486717db666b7df8717bdf2",
+    "allocationReceiptHash": "e9e65a7d1f4b28a9b68adce9c3dac4bdee6387613cdd43550138533f6fdce354",
+    "adapterReceiptHash": "11856c72203ecdd8e62b3ad992a1022914e84a3316179e4dc029d54ef79f0970"
   }
 }

@@ -1,4 +1,5 @@
 import { AllocationError, hash } from './canonical.js'
+import { AtomicNoEffectReplayClaims, validateDurableB03Funding } from './b03DurableFundingAdapter.js'
 import { CONTRACT_PINS } from './contractPins.js'
 import { DeterministicAllocationEngine, hashAllocationSnapshot } from './deterministicAllocator.js'
 
@@ -285,78 +286,118 @@ function engineEnvelope(input) {
   return { snapshot, snapshotHash: hashAllocationSnapshot(snapshot) }
 }
 
+function validateCompatibilityInput(input, now) {
+  validatePinSet(input.pinnedContractVersions)
+  validateCommand(input.command)
+  validateReceipt(input.command, input.receipt)
+  validateReadback(input.receipt, input.readback, now)
+  const durableFunding = validateDurableB03Funding(
+    input.command.payload.allocationSnapshot.funding,
+    input.command.context,
+    now,
+  )
+  return {
+    compatibilityInputHash: hash(input),
+    commandKey: `${input.command.context.tenant.tenantId}:${input.command.commandId}`,
+    durableFunding,
+  }
+}
+
+function buildReceipt(input, compatibilityInputHash, durableFunding) {
+  const allocation = new DeterministicAllocationEngine().simulate(engineEnvelope(input)).receipt
+  if (allocation.allocatedMinor !== input.command.payload.allocationSnapshot.request.requestedAmountMinor) {
+    fail('ALLOCATION_BALANCE_MISMATCH', 'allocation receipt does not balance to the requested amount', 409)
+  }
+  const receiptBody = {
+    contractVersion: CONTRACT_PINS.receiptContract,
+    receiptId: `b07_${hash({ compatibilityInputHash, purpose: 'B07_A02_B03_NO_EFFECT' }).slice(0, 32)}`,
+    compatibilityInputHash,
+    producerPins: {
+      api: `${CONTRACT_PINS.apiRepository}@${CONTRACT_PINS.apiProducerSha}`,
+      apiContractVersions: CONTRACT_PINS.apiContractVersions,
+      fep: `${CONTRACT_PINS.fepRepository}@${CONTRACT_PINS.fepJournalProducerSha}`,
+      fepJournalContract: CONTRACT_PINS.fepJournalContract,
+      fepPinSha256: CONTRACT_PINS.fepJournalPinSha256,
+      fepSchemaSha256: CONTRACT_PINS.fepJournalSchemaSha256,
+      fepMigrationSha256: CONTRACT_PINS.fepJournalMigrationSha256,
+      fepRollbackSha256: CONTRACT_PINS.fepJournalRollbackSha256,
+    },
+    evidence: {
+      commandId: input.command.commandId,
+      upstreamReceiptId: input.receipt.receiptId,
+      sourceReadbackRef: input.readback.evidence.sourceReadbackRef,
+      fepJournalHeadHash: durableFunding.replayHeadHash,
+      fepSourceReceiptHash: input.command.payload.allocationSnapshot.funding.sourceReceiptHash,
+      fepAppendIndex: durableFunding.appendIndex,
+      fepSourceSequence: durableFunding.sourceSequence,
+      fepReceiptDisposition: durableFunding.receiptDisposition,
+      fepReplayValid: durableFunding.replayValid,
+    },
+    balance: {
+      requestedMinor: input.command.payload.allocationSnapshot.request.requestedAmountMinor,
+      allocatedMinor: allocation.allocatedMinor,
+      balanced: true,
+      currency: allocation.currency,
+    },
+    allocation,
+    effectMode: CONTRACT_PINS.effectMode,
+    requestedEffect: CONTRACT_PINS.requestedEffect,
+    authority: {
+      syntheticOnly: true,
+      writeFepJournal: false,
+      writeAllocation: false,
+      writeReservation: false,
+      moveMoney: false,
+      callProvider: false,
+      approveOrDeny: false,
+      selectNamedRecipientForSponsor: false,
+      resolveAppeal: false,
+      runtimeActivation: false,
+      productionMigration: false,
+    },
+  }
+  return immutableClone({ ...receiptBody, receiptHash: hash(receiptBody) })
+}
+
 export class A02B03AllocationAdapter {
   constructor() {
-    this.engine = new DeterministicAllocationEngine()
     this.commands = new Map()
+    this.atomicClaims = new AtomicNoEffectReplayClaims(this.commands)
   }
 
   simulate(input, now) {
-    validatePinSet(input.pinnedContractVersions)
-    validateCommand(input.command)
-    validateReceipt(input.command, input.receipt)
-    validateReadback(input.receipt, input.readback, now)
-
-    const compatibilityInputHash = hash(input)
-    const commandKey = `${input.command.context.tenant.tenantId}:${input.command.commandId}`
+    const { compatibilityInputHash, commandKey, durableFunding } = validateCompatibilityInput(input, now)
     const previous = this.commands.get(commandKey)
     if (previous) {
-      if (previous.compatibilityInputHash !== compatibilityInputHash) {
+      if (previous.inputHash !== compatibilityInputHash) {
         fail('COMMAND_REPLAY_CONFLICT', 'command id was replayed with different compatibility evidence', 409)
       }
       return immutableClone({ disposition: 'REPLAYED', receipt: previous.receipt })
     }
 
-    const allocation = this.engine.simulate(engineEnvelope(input)).receipt
-    if (allocation.allocatedMinor !== input.command.payload.allocationSnapshot.request.requestedAmountMinor) {
-      fail('ALLOCATION_BALANCE_MISMATCH', 'allocation receipt does not balance to the requested amount', 409)
-    }
-    const receiptBody = {
-      contractVersion: CONTRACT_PINS.receiptContract,
-      receiptId: `b07_${hash({ compatibilityInputHash, purpose: 'B07_A02_B03_NO_EFFECT' }).slice(0, 32)}`,
-      compatibilityInputHash,
-      producerPins: {
-        api: `${CONTRACT_PINS.apiRepository}@${CONTRACT_PINS.apiProducerSha}`,
-        apiContractVersions: CONTRACT_PINS.apiContractVersions,
-        fep: `${CONTRACT_PINS.fepRepository}@${CONTRACT_PINS.fepJournalProducerSha}`,
-        fepJournalContract: CONTRACT_PINS.fepJournalContract,
-      },
-      evidence: {
-        commandId: input.command.commandId,
-        upstreamReceiptId: input.receipt.receiptId,
-        sourceReadbackRef: input.readback.evidence.sourceReadbackRef,
-        fepJournalHeadHash: input.command.payload.allocationSnapshot.funding.journalHeadHash,
-        fepSourceReceiptHash: input.command.payload.allocationSnapshot.funding.sourceReceiptHash,
-      },
-      balance: {
-        requestedMinor: input.command.payload.allocationSnapshot.request.requestedAmountMinor,
-        allocatedMinor: allocation.allocatedMinor,
-        balanced: true,
-        currency: allocation.currency,
-      },
-      allocation,
-      effectMode: CONTRACT_PINS.effectMode,
-      requestedEffect: CONTRACT_PINS.requestedEffect,
-      authority: {
-        syntheticOnly: true,
-        writeFepJournal: false,
-        moveMoney: false,
-        approveOrDeny: false,
-        selectNamedRecipientForSponsor: false,
-        resolveAppeal: false,
-        runtimeActivation: false,
-        productionMigration: false,
-      },
-    }
-    const receipt = immutableClone({ ...receiptBody, receiptHash: hash(receiptBody) })
-    this.commands.set(commandKey, { compatibilityInputHash, receipt })
+    const receipt = buildReceipt(input, compatibilityInputHash, durableFunding)
+    this.commands.set(commandKey, { inputHash: compatibilityInputHash, receipt })
     return immutableClone({ disposition: 'SIMULATED', receipt })
+  }
+
+  async simulateAtomic(input, now, options = {}) {
+    const { compatibilityInputHash, commandKey, durableFunding } = validateCompatibilityInput(input, now)
+    return this.atomicClaims.transact(commandKey, compatibilityInputHash, async () => {
+      const receipt = buildReceipt(input, compatibilityInputHash, durableFunding)
+      if (options.injectFailureAfterReceipt === true) {
+        fail('INJECTED_FAILURE_ROLLBACK', 'synthetic failure injected before the replay claim commit', 503)
+      }
+      return receipt
+    })
   }
 
   diagnostics() {
     return immutableClone({
       committedSimulations: this.commands.size,
+      replayClaims: this.commands.size,
       fepJournalWrites: 0,
+      allocationWrites: 0,
+      reservationWrites: 0,
       moneyEffects: 0,
       providerEffects: 0,
       runtimeActivations: 0,

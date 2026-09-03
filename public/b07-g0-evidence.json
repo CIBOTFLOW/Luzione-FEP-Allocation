@@ -2,7 +2,8 @@
   "schemaVersion": "luzione-fep-allocation-b07-preview/v0.1-draft",
   "gate": "G0",
   "status": "ISOLATED_SYNTHETIC_NO_EFFECT",
-  "controllerRelease": "b626c665d14a7baf419ec2fef42b1ee98b66a370",
+  "controllerRelease": "3a9c49fb3b7badb8a35eac1502e2ac3fb1be769c",
+  "controllerEvidenceDecision": "a4b85512f113ff15cfe689347d1c9de0edf98123",
   "producerPins": {
     "api": "CIBOTFLOW/Luzione-API@f2d643a0913b888809c217adfd9bdcef0385b05a",
     "apiContractVersions": [
@@ -13,13 +14,36 @@
       "luzione-readback-envelope/v0.2-draft.1"
     ],
     "fep": "CIBOTFLOW/FEP-Platform@526e513b0698c56fefbf5b5918bb025df73e8e9e",
-    "fepJournalContract": "fep-balanced-journal/v0.1-draft"
+    "fepJournalContract": "fep-balanced-journal/v0.1-draft",
+    "fepPinSha256": "939aa1c8337b2d18295c70a670b006cbc49137a46a46120fa27f420c00637fe6",
+    "fepSchemaSha256": "5023cebce38e4bb43a7372aad85bc457c48d9adf62b8ab9ab3d02a26ac0a54c4",
+    "fepMigrationSha256": "e13ea51c501bcc56825af0e7583ec0929d9f3d816acb232b6e2e234b7a299c0f",
+    "fepRollbackSha256": "3b926e7c8602207d551d05efd03ee308af695e34aa09eeb034735f77d3bff583"
   },
   "fixtureVectors": {
-    "payloadHash": "6af94c7d23c318abddd17319309c9f524a00f7218d3f6d886793f567c4b61169",
-    "innerSnapshotHash": "77205f99b1b2981d0111f229a18655c68b8522f97424d99d62c7a972f1a337df",
-    "allocationReceiptHash": "2df167dfdd621bcacccc30f8a7a4ca0f2e17058c5d825347f2c1ef96449d1df5",
-    "adapterReceiptHash": "202aa0f9e435b96491287cf789fc5fb4b1e4b65078443c3c635919927f9b5c8f"
+    "payloadHash": "52cf0acda564cec8508d1d1752906a6fdd511009ae4b472a844527f383dc2db1",
+    "innerSnapshotHash": "e3f42958b35015a32f3f75ba0899a41f967f09363486717db666b7df8717bdf2",
+    "allocationReceiptHash": "e9e65a7d1f4b28a9b68adce9c3dac4bdee6387613cdd43550138533f6fdce354",
+    "adapterReceiptHash": "11856c72203ecdd8e62b3ad992a1022914e84a3316179e4dc029d54ef79f0970"
+  },
+  "durableB03Readback": {
+    "fepJournalHeadHash": "053ff2a4c79a6ca031bde5d2e5bf28d8966b1cdd59ca647b5e40965296d22c81",
+    "fepSourceReceiptHash": "053ff2a4c79a6ca031bde5d2e5bf28d8966b1cdd59ca647b5e40965296d22c81",
+    "fepAppendIndex": 1,
+    "fepSourceSequence": 1,
+    "fepReceiptDisposition": "APPENDED",
+    "fepReplayValid": true
+  },
+  "durableAllocationReplay": {
+    "contractVersion": "luzione-fep-allocation-command-store/v0.1-draft",
+    "attempts": 24,
+    "simulated": 1,
+    "replayed": 23,
+    "durableRecordCount": 1,
+    "commandKeyHash": "40704175d8bfbf53a0b657b98671f87c14d30a1da7414dc354b529aa700f6fae",
+    "receiptHash": "11856c72203ecdd8e62b3ad992a1022914e84a3316179e4dc029d54ef79f0970",
+    "effectMode": "DISABLED",
+    "scope": "FILE_BACKED_G0_REHEARSAL"
   },
   "balance": {
     "requestedMinor": 600,
@@ -30,24 +54,29 @@
   "authority": {
     "syntheticOnly": true,
     "writeFepJournal": false,
+    "writeAllocation": false,
+    "writeReservation": false,
     "moveMoney": false,
+    "callProvider": false,
     "approveOrDeny": false,
     "selectNamedRecipientForSponsor": false,
     "resolveAppeal": false,
     "runtimeActivation": false,
     "productionMigration": false
   },
-  "durableReplay": {
-    "contractVersion": "luzione-fep-allocation-command-store/v0.1-draft",
-    "attempts": 24,
-    "simulated": 1,
-    "replayed": 23,
-    "durableRecordCount": 1,
-    "commandKeyHash": "40704175d8bfbf53a0b657b98671f87c14d30a1da7414dc354b529aa700f6fae",
-    "receiptHash": "202aa0f9e435b96491287cf789fc5fb4b1e4b65078443c3c635919927f9b5c8f",
-    "effectMode": "DISABLED",
-    "scope": "FILE_BACKED_G0_REHEARSAL"
-  },
+  "negativeCoverage": [
+    "A02_EXACT_FIVE_PIN_DRIFT",
+    "TENANT_AND_SERVER_IDENTITY",
+    "B03_SCHEMA_AND_PRODUCER_DRIFT",
+    "CONCURRENT_DUPLICATE_AND_IDEMPOTENCY_CONFLICT",
+    "ORDERING_AND_TRANSACTION_HASH_REPLAY",
+    "STALE_FUTURE_PENDING_NONFINAL",
+    "BALANCE_RECEIPT_READBACK_MISMATCH",
+    "FAIRNESS_PRIVACY_APPEAL",
+    "EFFECT_AUTHORITY_INJECTION",
+    "INJECTED_FAILURE_EXACT_ROLLBACK",
+    "FILE_BACKED_RESTART_AND_TAMPER_REPLAY"
+  ],
   "blockers": [
     "A02_G1_NOT_ACCEPTED",
     "B03_G1_NOT_ACCEPTED",
@@ -55,6 +84,7 @@
     "LIVE_FEP_INTEGRATION_NOT_RUN",
     "PRODUCTION_G2_NOT_GRANTED"
   ],
+  "sourceBinding": "Git deployment metadata and b07-g0-proof-${GITHUB_SHA} artifact bind this public-safe vector to an exact commit.",
   "integrated": false,
   "productionReady": false
 }
