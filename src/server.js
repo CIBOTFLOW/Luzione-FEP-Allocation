@@ -5,11 +5,14 @@ import { URL } from 'node:url'
 
 import { AllocationError } from './canonical.js'
 import { createDemoAllocationService } from './bootstrap.js'
+import { LUZIONE_VALUE_BOUNDARY } from './luzioneValueBoundary.js'
 
 const ASSETS = new Map([
   ['/', { file: '../public/index.html', type: 'text/html; charset=utf-8' }],
   ['/app.js', { file: '../public/app.js', type: 'text/javascript; charset=utf-8' }],
   ['/styles.css', { file: '../public/styles.css', type: 'text/css; charset=utf-8' }],
+  ['/demo-safety-kit.svg', { file: '../public/demo-safety-kit.svg', type: 'image/svg+xml; charset=utf-8' }],
+  ['/demo-transit.svg', { file: '../public/demo-transit.svg', type: 'image/svg+xml; charset=utf-8' }],
   ['/b07-g0-evidence.json', { file: '../public/b07-g0-evidence.json', type: 'application/json; charset=utf-8' }],
 ])
 
@@ -84,6 +87,15 @@ function resolveActor(request, service) {
   throw new AllocationError('AUTHENTICATION_REQUIRED', 'an authenticated portal session is required', 401)
 }
 
+function resolveOptionalActor(request, service) {
+  try {
+    return resolveActor(request, service)
+  } catch (error) {
+    if (error instanceof AllocationError && error.code === 'AUTHENTICATION_REQUIRED') return null
+    throw error
+  }
+}
+
 function routeContext(url, actor, defaults) {
   return {
     actor,
@@ -103,12 +115,23 @@ export function createAllocationHttpServer({ service, defaults }) {
         return sendJson(response, 200, {
           status: 'ok',
           service: 'luzione-fep-allocation',
-          version: '0.6.0',
+          version: '0.8.0-draft',
           authoritative: false,
           authoritySource: 'FEP_PLATFORM_PROJECTION',
           namedRecipientSelection: false,
           moneyMovement: false,
+          publicMovementFeed: true,
+          internalFepOperatingSystem: true,
         })
+      }
+
+      if (request.method === 'GET' && url.pathname === '/v1/movement-feed') {
+        const actor = resolveOptionalActor(request, service)
+        return sendJson(response, 200, service.listMovementFeed({
+          actor,
+          sponsorCode: url.searchParams.get('sponsorCode') ?? actor?.sponsorCode ?? 'LUZIONE',
+          sort: url.searchParams.get('sort') ?? 'TRENDING',
+        }))
       }
 
       const actor = resolveActor(request, service)
@@ -140,6 +163,57 @@ export function createAllocationHttpServer({ service, defaults }) {
           sponsorCode: actor.sponsorCode,
         }))
       }
+      if (request.method === 'GET' && url.pathname === '/v1/brand-versions') {
+        return sendJson(response, 200, service.listBrandVersions(context))
+      }
+      if (request.method === 'POST' && url.pathname === '/v1/brand-versions') {
+        const input = await readJson(request)
+        return sendJson(response, 201, service.registerBrandVersion({ ...input, actor, sponsorCode: actor.sponsorCode }))
+      }
+      if (request.method === 'GET' && url.pathname === '/v1/campaigns') {
+        return sendJson(response, 200, service.listCampaigns(context))
+      }
+      if (request.method === 'POST' && url.pathname === '/v1/campaigns') {
+        const input = await readJson(request)
+        return sendJson(response, 201, service.createCampaign({ ...input, actor, sponsorCode: actor.sponsorCode }))
+      }
+      if (request.method === 'POST' && /^\/v1\/campaigns\/[^/]+\/submit$/.test(url.pathname)) {
+        const campaignId = decodeURIComponent(url.pathname.split('/')[3])
+        return sendJson(response, 200, service.submitCampaign(actor, campaignId))
+      }
+      if (request.method === 'GET' && url.pathname === '/v1/sponsored-outcomes') {
+        return sendJson(response, 200, service.listSponsoredOutcomeRequests(context))
+      }
+      if (request.method === 'POST' && url.pathname === '/v1/sponsored-outcomes') {
+        const input = await readJson(request)
+        return sendJson(response, 201, service.createSponsoredOutcomeRequest({ ...input, actor, sponsorCode: actor.sponsorCode }))
+      }
+      if (request.method === 'GET' && url.pathname === '/v1/proof-feed') {
+        return sendJson(response, 200, service.listProofFeed(context))
+      }
+      if (request.method === 'POST' && url.pathname === '/v1/movement-posts') {
+        const input = await readJson(request)
+        return sendJson(response, 201, service.createMovementPost({ ...input, actor, sponsorCode: actor.sponsorCode }))
+      }
+      if (request.method === 'POST' && /^\/v1\/movement-posts\/[^/]+\/comments$/.test(url.pathname)) {
+        const postId = decodeURIComponent(url.pathname.split('/')[3])
+        const input = await readJson(request)
+        return sendJson(response, 201, service.createMovementComment({ ...input, postId, actor, sponsorCode: actor.sponsorCode }))
+      }
+      if (request.method === 'POST' && /^\/v1\/movement-posts\/[^/]+\/interactions$/.test(url.pathname)) {
+        const postId = decodeURIComponent(url.pathname.split('/')[3])
+        const input = await readJson(request)
+        return sendJson(response, 200, service.toggleMovementInteraction({ ...input, postId, actor, sponsorCode: actor.sponsorCode }))
+      }
+      if (request.method === 'GET' && url.pathname === '/v1/support-ledger') {
+        return sendJson(response, 200, service.getSupportLedger(context))
+      }
+      if (request.method === 'GET' && url.pathname === '/v1/priority-queue') {
+        return sendJson(response, 200, service.getPriorityQueue(context))
+      }
+      if (request.method === 'GET' && url.pathname === '/v1/platform-status') {
+        return sendJson(response, 200, service.getPlatformStatus(context))
+      }
       if (request.method === 'GET' && url.pathname === '/v1/impact') {
         return sendJson(response, 200, service.getImpact(context))
       }
@@ -154,11 +228,20 @@ export function createAllocationHttpServer({ service, defaults }) {
         return sendJson(response, 200, {
           sponsorCode: actor.sponsorCode,
           subjectId: actor.subjectId,
+          authoritySource: 'FEP_PLATFORM_PROJECTION',
           minimumCohortSize: service.minimumCohortSize,
           allocationTargets: ['PROGRAM', 'COHORT'],
+          specificOutcomeRail: 'PUBLIC_CASE_CODE_REQUIRES_FEP_REVIEW',
           namedRecipientSelection: false,
           rawEvidenceAccess: false,
           directMoneyMovement: false,
+          fundingRails: ['MERCHANT_FUNDED_OUTCOME', 'SPONSORED_DIRECT_GIFT', 'GOVERNED_PROGRAM_SUPPORT'],
+          surfaces: {
+            publicApp: 'LUZIONE_MOVEMENT_MEDIA',
+            internalOperatingSystem: 'FEP_PLATFORM',
+            sponsorWorkspace: 'LUZIONE_SPONSOR_OUTCOME_STUDIO',
+          },
+          valueBoundary: LUZIONE_VALUE_BOUNDARY,
           productionAuthenticationConfigured: Boolean(process.env.ALLOC_PORTAL_TOKENS_JSON?.trim()),
         })
       }

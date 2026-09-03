@@ -3,101 +3,153 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Luzione FEP allocation control center">
-  <title>Luzione FEP Allocation</title>
+  <meta name="description" content="Luzione movement media and the internal FEP operating system">
+  <title>Luzione · Fulfillment Economics Movement</title>
   <link rel="stylesheet" href="/styles.css">
   <script src="/app.js" defer></script>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <header class="topbar">
-    <a class="brand" href="/" aria-label="Luzione FEP allocation home">
-      <span class="brand-mark">LF</span>
-      <span>Luzione <small>FEP allocation</small></span>
+    <a class="brand" href="/" aria-label="Luzione Fulfillment Economics Movement home">
+      <span class="brand-mark" aria-hidden="true">L</span>
+      <span>Luzione <small>Fulfillment Economics Movement</small></span>
     </a>
-    <div class="boundary"><span></span> No-effect sponsor portal</div>
+    <div class="topbar-actions">
+      <span class="surface-chip">App + internal OS preview</span>
+      <div class="boundary"><span></span> G0 · no money or provider effects</div>
+    </div>
   </header>
 
   <div class="shell">
-    <nav class="sidebar" aria-label="Allocation portal">
-      <button class="nav-item active" data-view="overview">Overview</button>
-      <button class="nav-item" data-view="programs">Programs</button>
-      <button class="nav-item" data-view="opportunities">Opportunities</button>
-      <button class="nav-item" data-view="allocations">Allocations</button>
-      <button class="nav-item" data-view="impact">Impact</button>
-      <button class="nav-item" data-view="settings">Settings</button>
+    <nav class="sidebar" aria-label="Luzione movement and FEP operating system">
+      <p class="nav-label">Luzione app</p>
+      <button class="nav-item active" type="button" data-view="movement" aria-controls="movement" aria-current="page"><span aria-hidden="true">◎</span> Movement feed</button>
+      <button class="nav-item" type="button" data-view="opportunities" aria-controls="opportunities"><span aria-hidden="true">◇</span> Fundable outcomes</button>
+      <p class="nav-label">Sponsor studio</p>
+      <button class="nav-item" type="button" data-view="campaigns" aria-controls="campaigns"><span aria-hidden="true">□</span> Campaigns & brand</button>
+      <button class="nav-item" type="button" data-view="sponsorships" aria-controls="sponsorships"><span aria-hidden="true">↗</span> Sponsored outcomes</button>
+      <p class="nav-label internal-label">FEP OS · internal</p>
+      <button class="nav-item internal-nav" type="button" data-view="overview" aria-controls="overview"><span aria-hidden="true">◫</span> Control room</button>
+      <button class="nav-item internal-nav" type="button" data-view="priority" aria-controls="priority"><span aria-hidden="true">↕</span> Priority queue</button>
+      <button class="nav-item internal-nav" type="button" data-view="ledger" aria-controls="ledger"><span aria-hidden="true">≡</span> Support ledger</button>
+      <button class="nav-item internal-nav" type="button" data-view="allocations" aria-controls="allocations"><span aria-hidden="true">⌁</span> Program allocation</button>
+      <button class="nav-item internal-nav" type="button" data-view="health" aria-controls="health"><span aria-hidden="true">◉</span> System health</button>
+      <button class="nav-item internal-nav" type="button" data-view="knowledge" aria-controls="knowledge"><span aria-hidden="true">▤</span> Program knowledge</button>
+      <button class="nav-item internal-nav" type="button" data-view="settings" aria-controls="settings"><span aria-hidden="true">⚙</span> Value & authority</button>
+      <div class="sidebar-note"><strong>Two surfaces, one governed flow.</strong><span>The Luzione app publishes consented stories and verified support events. The internal FEP OS masks identity, evaluates priority, records receipts, and controls allocation.</span></div>
     </nav>
 
-    <main class="workspace">
-      <section class="view active" id="overview" aria-labelledby="overview-title">
-        <div class="page-head">
-          <div>
-            <p class="eyebrow">FEP-reported position</p>
-            <h1 id="overview-title">Allocation control center</h1>
-            <p class="lede">Fund approved programs or broad reviewed cohorts. FEP retains case decisions and money authority.</p>
+    <main class="workspace" id="main-content" tabindex="-1" aria-busy="true">
+      <p class="form-status global-status" id="global-status" role="status" aria-live="polite">Loading Luzione movement…</p>
+
+      <section class="view active" id="movement" aria-labelledby="movement-title">
+        <div class="feed-layout">
+          <div class="feed-column">
+            <div class="page-head feed-head"><div><p class="eyebrow">Luzione app · public movement media</p><h1 id="movement-title">Useful help. Visible proof. Human moments.</h1><p class="lede">A living feed of FEP-verified support and voluntary community updates—without exposing a recipient’s private identity.</p></div></div>
+            <section class="moments-section" aria-labelledby="moments-title">
+              <div class="section-head inline-head"><div><span class="notice-kicker">Happy Moments</span><h2 id="moments-title">Reels</h2></div><small>Verified progress and voluntary updates</small></div>
+              <div class="moments-row" id="happy-moments" tabindex="0" aria-label="Happy Moments reels"></div>
+            </section>
+            <form class="composer" id="post-form">
+              <div class="composer-topline"><span class="avatar" aria-hidden="true">Y</span><div><strong>Share an update</strong><small>Photos, a slideshow, or one short video</small></div><button class="text-button" id="composer-toggle" type="button" aria-expanded="false" aria-controls="composer-fields">Create post</button></div>
+              <div class="composer-fields" id="composer-fields" hidden>
+                <div class="field-pair"><label>Account name<input name="displayName" maxlength="80" value="Luzione Member" required></label><label>Handle<input name="handle" maxlength="40" value="luzione.member" required></label></div>
+                <label>Location<input name="location" maxlength="120" placeholder="General area only—never an address" required></label>
+                <label>Caption<textarea name="caption" maxlength="500" rows="4" placeholder="What happened, and why did it matter? Keep private details out." required></textarea></label>
+                <label>Photo, slideshow, or video<input name="media" type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm" multiple required></label>
+                <div class="media-preview" id="media-preview" aria-live="polite"></div>
+                <label>Optional public case code<input name="publicCaseCode" maxlength="120" placeholder="Example: LZN-WORK-002"></label>
+                <label class="check"><input name="publicationConsent" type="checkbox" required> I have the right to publish this update, and it contains no private recipient information.</label>
+                <button class="primary" type="submit">Publish update</button>
+                <p class="microcopy">Media is previewed locally in G0. Durable photo/video storage remains a production integration gate.</p>
+                <p class="form-status" id="post-status" role="status"></p>
+              </div>
+            </form>
+            <div class="feed-toolbar" role="group" aria-label="Sort movement feed">
+              <button class="feed-filter active" type="button" data-feed-sort="TRENDING" aria-pressed="true">Trending</button>
+              <button class="feed-filter" type="button" data-feed-sort="LATEST" aria-pressed="false">Latest</button>
+              <button class="feed-filter" type="button" data-feed-sort="FOLLOWING" aria-pressed="false">Following</button>
+              <span class="live-indicator"><i></i> Live feed</span>
+            </div>
+            <div class="movement-feed" id="movement-feed" aria-live="polite"></div>
           </div>
-          <button class="secondary" id="refresh">Refresh readback</button>
+          <aside class="feed-aside" aria-label="Movement feed context">
+            <section class="aside-card proof-explainer"><span class="notice-kicker">What “verified” means</span><h2>Proof has a precise state.</h2><p>Funded, reserved, sent or ordered, delivered, then outcome confirmed. A voluntary post is always labeled differently.</p></section>
+            <section class="aside-card"><span class="notice-kicker">Live snapshot</span><div class="snapshot-list" id="feed-snapshot"></div></section>
+            <section class="aside-card quiet-card"><strong>Privacy is not optional.</strong><p>Public case codes, generalized locations, consented media, and separate posting permission. No names, addresses, raw evidence, or gratitude requirements.</p></section>
+          </aside>
         </div>
-        <div class="metric-grid" id="overview-metrics" aria-live="polite"></div>
-        <article class="notice">
-          <strong>Named-recipient selection is unavailable by design.</strong>
-          <p>Public-safe case cards explain the work. They are not selectable allocation targets.</p>
-        </article>
       </section>
 
-      <section class="view" id="programs" aria-labelledby="programs-title">
-        <div class="page-head"><div><p class="eyebrow">Governed scope</p><h1 id="programs-title">Programs</h1></div></div>
-        <div class="card-grid" id="program-list"></div>
+      <section class="view" id="opportunities" aria-labelledby="opportunities-title" hidden>
+        <div class="page-head"><div><p class="eyebrow">Luzione app · actually fundable</p><h1 id="opportunities-title">Useful outcomes</h1><p class="lede">Only consented, FEP-reviewed public case codes appear here. Sponsors never receive private identity, raw evidence, or delivery details.</p></div></div>
+        <div class="card-grid" id="opportunity-list"></div><p class="form-status page-status" id="opportunity-status" role="status"></p>
       </section>
 
-      <section class="view" id="opportunities" aria-labelledby="opportunities-title">
-        <div class="page-head">
-          <div><p class="eyebrow">Consented public-safe context</p><h1 id="opportunities-title">Opportunities</h1></div>
-        </div>
-        <div class="card-grid" id="opportunity-list"></div>
-      </section>
-
-      <section class="view" id="allocations" aria-labelledby="allocations-title">
-        <div class="page-head">
-          <div><p class="eyebrow">Preference, not payment</p><h1 id="allocations-title">Allocation intents</h1></div>
-        </div>
-        <div class="split">
-          <form class="panel form" id="intent-form">
-            <h2>Create an intent</h2>
-            <label>Program<select id="intent-program" name="programId" required></select></label>
-            <label>Target type
-              <select id="intent-target-type" name="targetType" required>
-                <option value="PROGRAM">Approved program</option>
-                <option value="COHORT">Reviewed cohort</option>
-              </select>
-            </label>
-            <label id="cohort-field">Reviewed cohort<select id="intent-cohort" name="cohortId"></select></label>
-            <label>Amount in USD
-              <input name="amount" type="number" min="1" step="0.01" inputmode="decimal" required>
-            </label>
-            <label>Purpose note (no names or contact details)
-              <textarea name="rationale" maxlength="300" rows="3"></textarea>
-            </label>
-            <button class="primary" type="submit">Submit for FEP review</button>
-            <p class="form-status" id="form-status" role="status"></p>
+      <section class="view" id="campaigns" aria-labelledby="campaigns-title" hidden>
+        <div class="page-head"><div><p class="eyebrow">Luzione Sponsor Outcome Studio</p><h1 id="campaigns-title">Campaigns & brand</h1><p class="lede">Pin approved logo and tagline versions to a capped funding rail. Historical proof never changes when branding changes later.</p></div></div>
+        <div class="card-grid" id="campaign-list"></div>
+        <div class="split setup-grid">
+          <section class="panel"><div class="section-head"><div><span class="notice-kicker">Immutable versions</span><h2>Brand assets</h2></div></div><div class="stack" id="brand-list"></div>
+            <form class="form inset-form" id="brand-form"><h3>Register a new version</h3><label>Display name<input name="displayName" maxlength="120" value="Luzione" required></label><label>Tagline<input name="tagline" maxlength="160" placeholder="A short, factual sponsor line" required></label><label>Logo file<input name="logo" type="file" accept="image/png,image/jpeg,image/webp" required></label><label>Logo alt text<input name="altText" maxlength="160" placeholder="Luzione wordmark" required></label><button class="secondary" type="submit">Register for review</button><p class="microcopy">This preview registers verified metadata only. Durable asset storage remains an integration gate.</p><p class="form-status" id="brand-status" role="status"></p></form>
+          </section>
+          <form class="panel form" id="campaign-form"><span class="notice-kicker">Closed-loop direct gift</span><h2>Create a campaign draft</h2><label>Approved brand<select name="brandVersionId" id="campaign-brand" required></select></label><label>Campaign name<input name="name" maxlength="180" required></label><label>Public summary<textarea name="publicSummary" maxlength="500" rows="3" required></textarea></label><div class="field-pair"><label>Budget (USD)<input name="budget" type="number" min="1" step="0.01" required></label><label>Per-outcome cap<input name="cap" type="number" min="1" step="0.01" required></label></div><label>Allowed categories<input name="categories" value="WORK_ENABLEMENT" required></label><label>Allowed regions<input name="regions" value="US-CA-SAN-MATEO"></label><div class="field-pair"><label>Starts<input name="startsAt" type="datetime-local" required></label><label>Ends<input name="endsAt" type="datetime-local" required></label></div>
+            <fieldset><legend>Required acknowledgements</legend><label class="check"><input name="nonCharitable" type="checkbox" required> This direct gift is not represented as tax-deductible.</label><label class="check"><input name="noContact" type="checkbox" required> Sponsor receives no private identity or contact details.</label><label class="check"><input name="noPublicity" type="checkbox" required> Help is never conditional on publicity or gratitude.</label><label class="check"><input name="closedLoop" type="checkbox" required> No cash-out, exchange, or market trading is offered.</label></fieldset>
+            <button class="primary" type="submit">Create and submit to FEP</button><p class="form-status" id="campaign-status" role="status"></p>
           </form>
-          <div class="panel">
-            <h2>Readback</h2>
-            <div class="stack" id="intent-list"></div>
-          </div>
         </div>
       </section>
 
-      <section class="view" id="impact" aria-labelledby="impact-title">
-        <div class="page-head"><div><p class="eyebrow">Suppressed aggregate projection</p><h1 id="impact-title">Impact</h1></div></div>
-        <div id="impact-content"></div>
+      <section class="view" id="sponsorships" aria-labelledby="sponsorships-title" hidden>
+        <div class="page-head"><div><p class="eyebrow">Luzione Sponsor Outcome Studio</p><h1 id="sponsorships-title">Sponsored outcomes</h1><p class="lede">Hash-bound support requests awaiting or reflecting FEP review. Acceptance in G0 remains explicitly no-effect.</p></div></div>
+        <div class="panel table-panel"><div class="stack" id="sponsored-list"></div></div>
       </section>
 
-      <section class="view" id="settings" aria-labelledby="settings-title">
-        <div class="page-head"><div><p class="eyebrow">Access and authority</p><h1 id="settings-title">Settings</h1></div></div>
-        <div class="panel definition-list" id="settings-list"></div>
+      <section class="view internal-view" id="overview" aria-labelledby="overview-title" hidden>
+        <div class="internal-banner"><span>Internal FEP OS</span><strong>Not a public-facing website</strong><small>Identity, priority, allocation, evaluation, and system truth live here.</small></div>
+        <div class="page-head"><div><p class="eyebrow">Operating control room</p><h1 id="overview-title">Run the program from system truth.</h1><p class="lede">Receive governed funding requests, preserve masked identity, track impact, and watch every operational boundary.</p></div><button class="secondary" id="refresh" type="button">Refresh FEP readback</button></div>
+        <div class="metric-grid" id="overview-metrics" aria-live="polite"></div>
+        <div class="overview-grid"><article class="notice"><span class="notice-kicker">Authority path</span><strong>Allocation sources submit requests. FEP verifies policy and retains the hidden-recipient decision.</strong><p>The sponsor sees public case codes and aggregate cohorts. Private identity, exact need evidence, urgency scoring, and final prioritization remain inside FEP.</p></article><article class="panel compact"><span class="notice-kicker">Latest verified proof</span><div id="overview-proof"></div></article></div>
+      </section>
+
+      <section class="view internal-view" id="priority" aria-labelledby="priority-title" hidden>
+        <div class="internal-banner"><span>Internal FEP OS</span><strong>Masked priority queue</strong><small>Sultan supports the review; FEP-controlled human authority makes the final decision.</small></div>
+        <div class="page-head"><div><p class="eyebrow">Need and immediacy</p><h1 id="priority-title">Prioritize the need, never the person’s publicity.</h1><p class="lede">Masked case IDs, generalized need, necessity bands, and policy-safe priority factors stay internal. Sponsors cannot select a hidden individual.</p></div></div>
+        <div class="priority-list" id="priority-queue"></div>
+      </section>
+
+      <section class="view internal-view" id="ledger" aria-labelledby="ledger-title" hidden>
+        <div class="internal-banner"><span>Internal FEP OS</span><strong>Support ledger</strong><small>Receipt acknowledgment, validation requirements, and optional publication.</small></div>
+        <div class="page-head"><div><p class="eyebrow">Governed readback</p><h1 id="ledger-title">Know what was recorded—and what still needs proof.</h1><p class="lede">Every entry distinguishes a request, an FEP acceptance, a fulfillment state, and a separately consented public post.</p></div></div>
+        <div class="ledger-list" id="support-ledger"></div>
+      </section>
+
+      <section class="view internal-view" id="allocations" aria-labelledby="allocations-title" hidden>
+        <div class="internal-banner"><span>Internal FEP OS</span><strong>Program allocation</strong><small>Program and broad-cohort support only.</small></div>
+        <div class="page-head"><div><p class="eyebrow">Governed support</p><h1 id="allocations-title">Program allocation</h1><p class="lede">This rail funds an approved program or broad reviewed cohort. It remains separate from specific public-code sponsorship.</p></div></div>
+        <div class="card-grid program-grid" id="program-list"></div>
+        <div class="split"><form class="panel form" id="intent-form"><h2>Create an allocation intent</h2><label>Program<select id="intent-program" name="programId" required></select></label><label>Target type<select id="intent-target-type" name="targetType" required><option value="PROGRAM">Approved program</option><option value="COHORT">Reviewed cohort</option></select></label><label id="cohort-field">Reviewed cohort<select id="intent-cohort" name="cohortId"></select></label><label>Amount in USD<input name="amount" type="number" min="1" step="0.01" inputmode="decimal" required></label><label>Purpose note (no names or contact details)<textarea name="rationale" maxlength="300" rows="3"></textarea></label><button class="primary" type="submit">Submit for FEP review</button><p class="form-status" id="form-status" role="status"></p></form><div class="panel"><h2>Allocation readback</h2><div class="stack" id="intent-list"></div></div></div>
+      </section>
+
+      <section class="view internal-view" id="health" aria-labelledby="health-title" hidden>
+        <div class="internal-banner"><span>Internal FEP OS</span><strong>System-by-system health</strong><small>Pass, simulated pass, configuration gate, or disabled—never vague green lights.</small></div>
+        <div class="page-head"><div><p class="eyebrow">Evaluation center</p><h1 id="health-title">Health and testing</h1><p class="lede">A control surface modeled after Sultan OS: each system has a current status, evidence, and an honest production gate.</p></div></div>
+        <div class="health-grid" id="system-health"></div><section class="panel evaluation-panel"><div class="section-head"><div><span class="notice-kicker">Current evaluations</span><h2>Test evidence</h2></div></div><div class="evaluation-list" id="evaluation-list"></div></section>
+      </section>
+
+      <section class="view internal-view" id="knowledge" aria-labelledby="knowledge-title" hidden>
+        <div class="internal-banner"><span>Internal FEP OS</span><strong>Program knowledge</strong><small>The current model, boundary decisions, and open gates in one place.</small></div>
+        <div class="page-head"><div><p class="eyebrow">Living program record</p><h1 id="knowledge-title">What the FEP program is now.</h1><p class="lede">This panel documents the operating model and current state so product decisions do not drift between the app, platform, sponsor studio, and FEP authority.</p></div></div>
+        <div class="knowledge-grid" id="knowledge-list"></div>
+      </section>
+
+      <section class="view internal-view" id="settings" aria-labelledby="settings-title" hidden>
+        <div class="internal-banner"><span>Internal FEP OS</span><strong>Hard boundaries</strong><small>Utility and recognition without market-value promises.</small></div>
+        <div class="page-head"><div><p class="eyebrow">Value and authority</p><h1 id="settings-title">Grow usefulness, not a unit’s price.</h1><p class="lede">The app may recognize participation. The platform may later administer funded essentials access. Neither is a tradable financial product.</p></div></div>
+        <div class="value-grid" id="value-boundary"></div><dl class="panel definition-list" id="settings-list"></dl>
       </section>
     </main>
   </div>
 </body>
 </html>
-

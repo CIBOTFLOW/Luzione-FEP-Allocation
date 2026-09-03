@@ -34,6 +34,17 @@
     "fepReceiptDisposition": "APPENDED",
     "fepReplayValid": true
   },
+  "durableAllocationReplay": {
+    "contractVersion": "luzione-fep-allocation-command-store/v0.1-draft",
+    "attempts": 24,
+    "simulated": 1,
+    "replayed": 23,
+    "durableRecordCount": 1,
+    "commandKeyHash": "40704175d8bfbf53a0b657b98671f87c14d30a1da7414dc354b529aa700f6fae",
+    "receiptHash": "11856c72203ecdd8e62b3ad992a1022914e84a3316179e4dc029d54ef79f0970",
+    "effectMode": "DISABLED",
+    "scope": "FILE_BACKED_G0_REHEARSAL"
+  },
   "balance": {
     "requestedMinor": 600,
     "allocatedMinor": 600,
@@ -63,7 +74,15 @@
     "BALANCE_RECEIPT_READBACK_MISMATCH",
     "FAIRNESS_PRIVACY_APPEAL",
     "EFFECT_AUTHORITY_INJECTION",
-    "INJECTED_FAILURE_EXACT_ROLLBACK"
+    "INJECTED_FAILURE_EXACT_ROLLBACK",
+    "FILE_BACKED_RESTART_AND_TAMPER_REPLAY"
+  ],
+  "blockers": [
+    "A02_G1_NOT_ACCEPTED",
+    "B03_G1_NOT_ACCEPTED",
+    "PRODUCTION_TRANSACTIONAL_STORE_NOT_IMPLEMENTED",
+    "LIVE_FEP_INTEGRATION_NOT_RUN",
+    "PRODUCTION_G2_NOT_GRANTED"
   ],
   "sourceBinding": "Git deployment metadata and b07-g0-proof-${GITHUB_SHA} artifact bind this public-safe vector to an exact commit.",
   "integrated": false,

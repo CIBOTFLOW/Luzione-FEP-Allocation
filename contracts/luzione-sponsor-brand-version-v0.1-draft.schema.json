@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.luzione.example/luzione-sponsor-brand-version-v0.1-draft.schema.json",
+  "title": "Luzione sponsor brand version draft",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["displayName", "tagline", "logoAsset"],
+  "properties": {
+    "displayName": {"type": "string", "minLength": 1, "maxLength": 120},
+    "tagline": {"type": "string", "minLength": 1, "maxLength": 160},
+    "logoAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["assetId", "fileName", "mimeType", "byteSize", "sha256", "altText"],
+      "properties": {
+        "assetId": {"type": "string", "minLength": 1, "maxLength": 160},
+        "fileName": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$"},
+        "mimeType": {"enum": ["image/png", "image/jpeg", "image/webp"]},
+        "byteSize": {"type": "integer", "minimum": 1, "maximum": 5000000},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "altText": {"type": "string", "minLength": 1, "maxLength": 160}
+      }
+    }
+  }
+}

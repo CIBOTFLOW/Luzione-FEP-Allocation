@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.luzione.example/fep-media-event-v1.schema.json",
+  "title": "FEP media event projection v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "mediaEventId", "version", "campaignId", "brandVersionId", "publicCaseCode",
+    "lifecycleState", "headline", "summary", "amountMinor", "currency", "occurredAt",
+    "publicationConsentVerified", "publicationConsentVersion", "sponsorConsentVersion",
+    "reconciliationState"
+  ],
+  "properties": {
+    "mediaEventId": {"type": "string", "minLength": 1, "maxLength": 160},
+    "version": {"type": "integer", "minimum": 1},
+    "campaignId": {"type": "string", "minLength": 1, "maxLength": 160},
+    "brandVersionId": {"type": "string", "minLength": 1, "maxLength": 160},
+    "publicCaseCode": {"type": "string", "minLength": 1, "maxLength": 120},
+    "lifecycleState": {"enum": ["FUNDED", "RESERVED", "SENT_OR_ORDERED", "DELIVERED", "OUTCOME_CONFIRMED"]},
+    "headline": {"type": "string", "minLength": 1, "maxLength": 180},
+    "summary": {"type": "string", "minLength": 1, "maxLength": 500},
+    "amountMinor": {"type": "integer", "minimum": 1},
+    "currency": {"type": "string", "pattern": "^[A-Z]{3}$"},
+    "occurredAt": {"type": "string", "format": "date-time"},
+    "publicationConsentVerified": {"const": true},
+    "publicationConsentVersion": {"type": "string", "minLength": 1, "maxLength": 120},
+    "sponsorConsentVersion": {"type": "string", "minLength": 1, "maxLength": 120},
+    "reconciliationState": {"enum": ["PENDING", "RECONCILED"]}
+  }
+}

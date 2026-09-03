@@ -1,56 +1,105 @@
-# Luzione FEP Allocation v0.6
+# Luzione FEP Allocation v0.8
 
-Company-facing allocation control center for `fep.luzione.com`.
+Luzione movement media, Sponsor Outcome Studio, and the internal FEP operating-system preview for `fep.luzione.com`.
 
-The service lets an authenticated company member understand an FEP-reported funding position, configure programs, browse consented public-safe context, and submit allocation preferences for approved programs or sufficiently broad reviewed cohorts.
+The product now has three deliberately separated surfaces:
 
-It does not let a sponsor select a named recipient, inspect private evidence, approve a case, reserve FEP funds, or move money.
+- the **Luzione app**, an Instagram/X-inspired movement feed for verified support events and clearly labeled voluntary updates;
+- the **Luzione Sponsor Outcome Studio**, where a company versions its identity, configures a capped campaign, and requests a bounded public-code outcome;
+- the **internal FEP OS**, where masked identity, validation, prioritization authority, support readback, evaluation, system health, and program knowledge belong.
 
-## Implemented reference slice
+It does **not** let a sponsor identify or contact a recipient, inspect private evidence, approve a case, reserve authoritative funds, move money, promise publicity, issue cryptocurrency, or create charitable-deduction language.
 
-- tenant membership with viewer, planner, and admin roles;
-- recursive canonical hashes and idempotent sponsor commands;
-- FEP-reported available-allocation projections with monotonic versions;
-- verified FEP receipt injection that fails closed unless a server-side verifier accepts the receipt;
-- draft program configuration and FEP acceptance/rejection readback;
-- reviewed cohort projections with minimum-size privacy enforcement;
-- consented public-safe case cards that cannot become allocation targets;
-- program/cohort allocation intents with pending holds that prevent aggregate overcommitment;
-- hash-bound FEP intent disposition and later balance reconciliation;
-- aggregate impact with small-cohort metric suppression;
-- tenant audit records for sponsor views and intent creation;
-- accessible responsive Overview, Programs, Opportunities, Allocations, Impact, and Settings UI;
-- production startup that fails closed without an authentication token map.
+## Implemented product slice
 
-The in-memory service and fixture receipt verifier are no-effect reference infrastructure. Production must replace both with authenticated FEP APIs and durable storage.
+- organization membership with viewer, planner, and admin roles;
+- immutable sponsor brand versions with SHA-256 asset metadata and FEP review status;
+- capped, dated campaigns across three explicit funding rails;
+- direct-outcome requests using only an FEP-issued public case code and the exact published amount;
+- separate program/cohort allocation intents that continue to prohibit case-level targeting;
+- FEP-owned disposition receipts bound to immutable request hashes;
+- proof-feed projections across `FUNDED`, `RESERVED`, `SENT_OR_ORDERED`, `DELIVERED`, and `OUTCOME_CONFIRMED`;
+- separate publication consent, reconciliation gates, versioned sponsor attribution, and withdrawal readback;
+- financial-promise scanning that rejects public copy suggesting a coin, crypto, trading, cash-out, appreciation, yield, investment return, or future conversion entitlement;
+- closed-loop product boundaries for nonmonetary **Luzione Impact Points** and funded **Luzione Essentials Credits**;
+- tenant audit history and minimum-cohort reporting suppression;
+- responsive movement feed with Happy Moments, trending/latest/following views, account and generalized-location attribution, captions beneath media, photo/video/slideshow selection, heart, threaded photo comments, send, bookmark, and follow controls—without repost behavior;
+- a support ledger that separates request recording, receipt acknowledgement, validation requirements, lifecycle state, and optional consented publication;
+- a read-only masked priority queue for generalized need, immediacy bands, policy-safe factors, and FEP-controlled human review, with Sultan limited to decision support;
+- an internal control room with overall/daily impact, system-by-system health, evaluation evidence, governance measures, and living program knowledge;
+- responsive Sponsor Outcome Studio with campaign, allocation, and authority views;
+- production startup that fails closed without a server-side authentication token map.
+
+The current service is an in-memory, no-effect reference implementation. Selected photo/video files are previewed locally and only public-safe metadata is retained; durable media storage is not connected. Its fixture verifier and seeded demo are not production authority.
+
+## The three funding rails
+
+| Rail | Sponsor chooses | FEP retains | Current effect |
+| --- | --- | --- | --- |
+| `MERCHANT_FUNDED_OUTCOME` | an approved merchant/outcome campaign | eligibility, case authority, settlement readback | disabled |
+| `SPONSORED_DIRECT_GIFT` | one public case code at the exact published amount | availability, identity, approval, fulfillment, reconciliation | disabled |
+| `GOVERNED_PROGRAM_SUPPORT` | an approved program or sufficiently broad reviewed cohort | person-level selection and every authoritative decision | disabled |
+
+The direct-gift rail is intentionally separate from the allocation engine. Adding public-code sponsorship does not weaken the engine's `PROGRAM`/`COHORT` target rule.
+
+## Closed-loop value boundary
+
+`src/luzioneValueBoundary.js` is a product and messaging invariant, not an issued asset or payment rail.
+
+- **Luzione Impact Points** record verified participation and recognition. They have no monetary value, transfer, redemption, eligibility influence, or promised future conversion.
+- **Luzione Essentials Credits** may eventually provide closed-loop access to approved essentials, but may be issued only against cleared sponsor funding or committed fulfillment capacity. They have no P2P transfer, cash-out, exchange listing, or appreciation claim.
+- Merchant settlement remains fiat or a regulated-provider responsibility. Restricted reserves cannot fund operations.
+
+No blockchain, token, wallet, exchange, treasury sale, or crypto repository is part of this release.
 
 ## B07 A02/B03 compatibility proof
 
-The G0-only adapters in `src/a02B03AllocationAdapter.js` and `src/b03DurableFundingAdapter.js` pin controller release `3a9c49fb3b7badb8a35eac1502e2ac3fb1be769c`, `CIBOTFLOW/Luzione-API@f2d643a0913b888809c217adfd9bdcef0385b05a`, exactly all five `v0.2-draft.1` identifiers and artifact digests, and durable disposable-PostgreSQL producer `CIBOTFLOW/FEP-Platform@526e513b0698c56fefbf5b5918bb025df73e8e9e` with `fep-balanced-journal/v0.1-draft`.
+The isolated adapters pin controller release `3a9c49fb3b7badb8a35eac1502e2ac3fb1be769c` and evidence decision `a4b85512f113ff15cfe689347d1c9de0edf98123`, plus:
 
-The Allocation-local compatibility boundary validates the exact B03 journal schema, PIN, rehearsal migration and rollback digests; journal transaction fields; append index and previous/head hashes; durable receipt; replay readback; tenant; balance; and finality. Its concurrency-safe replay claim is deliberately process-local G0 evidence, so it does not satisfy durable Allocation integration.
+- `CIBOTFLOW/Luzione-API@f2d643a0913b888809c217adfd9bdcef0385b05a` and exactly five `v0.2-draft.1` contracts and artifact digests;
+- `CIBOTFLOW/FEP-Platform@526e513b0698c56fefbf5b5918bb025df73e8e9e` and `fep-balanced-journal/v0.1-draft`;
+- exact A02 identity, command, receipt, and readback fields;
+- exact B03 journal transaction, append index, prior/head hash, balanced postings, durable receipt, replay readback, tenant, finality, balance, and currency fields.
 
-It accepts only server-derived exact-tenant identity, `DRAFT_ONLY`, `SYNTHETIC_ONLY`, `NO_EFFECT`, domain-committed receipts that grant no effect authority, fresh source-confirmed A02 readback, and valid balanced B03 replay readback. The adapter produces deterministic local receipts and cannot write the FEP journal, persist an allocation or reservation, call a provider, move money, select a named recipient, approve or deny, resolve an appeal, activate runtime behavior, or migrate production data.
+`A02B03AllocationAdapter` consumes the exact durable B03 disposable-Postgres evidence and serializes process-local compatibility claims. `DurableA02B03AllocationAdapter` additionally writes a file-backed G0 command record with an exclusive claim lock, atomic fsync/rename, immutable replay, conflict denial, and record-integrity verification. Together they cover B03 receipt/readback replay plus Allocation process restart and concurrent replay in the rehearsal; neither is a substitute for transactional production Postgres.
 
-Run `npm run proof:b07` for the reproducible fixture packet. A deployed branch may expose the same public-safe vector at `/b07-g0-evidence.json`; deployment metadata, not the file itself, binds it to a commit SHA.
+The adapter is restricted to `DRAFT_ONLY`, `SYNTHETIC_ONLY`, and `NO_EFFECT`. It cannot write the FEP journal, move money, select a recipient, approve or deny, resolve an appeal, activate runtime behavior, or migrate production data.
+
+Run `npm run proof:b07` for the deterministic evidence packet. `/b07-g0-evidence.json` exposes a public-safe preview vector only; deployment metadata must bind it to a commit.
 
 ## Run
 
 ```bash
 npm run check
+npm run proof:b07
 npm start
 ```
 
-Open `http://localhost:8091`. Non-production uses an explicitly seeded demo membership. The demo contains no real recipient data and performs no external effect.
+Open `http://localhost:8091`. The non-production demo contains synthetic public-safe data and performs no external effect.
 
 ## API
 
 ```text
 GET  /health
+GET  /v1/movement-feed?sort=TRENDING|LATEST|FOLLOWING
+POST /v1/movement-posts
+POST /v1/movement-posts/:postId/comments
+POST /v1/movement-posts/:postId/interactions
 GET  /v1/overview
 GET  /v1/programs
 GET  /v1/cohorts?programId=...
 GET  /v1/opportunities?programId=...&cohortId=...
+GET  /v1/brand-versions
+POST /v1/brand-versions
+GET  /v1/campaigns
+POST /v1/campaigns
+POST /v1/campaigns/:campaignId/submit
+GET  /v1/sponsored-outcomes
+POST /v1/sponsored-outcomes
+GET  /v1/proof-feed
+GET  /v1/priority-queue?programId=...
+GET  /v1/support-ledger
+GET  /v1/platform-status
 GET  /v1/allocation-intents
 POST /v1/allocation-intents
 GET  /v1/impact?programId=...
@@ -58,35 +107,22 @@ GET  /v1/audit
 GET  /v1/settings
 ```
 
-Allocation intent targets are limited to `PROGRAM` and `COHORT`. `PUBLIC_CASE_CARD`, case IDs, recipient IDs, names, addresses, contacts, and raw evidence fail closed.
+Sponsor mutations create drafts or review requests only. FEP review ingestion remains a server-side integration boundary and is not exposed as a sponsor route.
 
 ## Production authentication boundary
 
-In production, the reference server requires `ALLOC_PORTAL_TOKENS_JSON`, a server-only JSON map from opaque bearer tokens to `{ sponsorCode, subjectId }`. This is a temporary adapter contract, not the end-state login system. Replace it with an IdP-backed, HttpOnly session and durable organization membership before production exposure.
+In production, the reference server requires `ALLOC_PORTAL_TOKENS_JSON`, a server-only JSON map from opaque bearer tokens to `{ sponsorCode, subjectId }`. Replace this temporary adapter with an IdP-backed, HttpOnly session and durable organization membership before any production exposure.
 
-Never put the token map, FEP credentials, or receipt-verification keys in browser code.
-
-## FEP readback
-
-Every authoritative projection or disposition must be bound to:
-
-- an exact contract version;
-- an FEP resource type and identifier;
-- a canonical payload hash;
-- an immutable receipt ID and timestamp;
-- a canonical receipt hash;
-- a signature/authenticity result supplied by the server-side verifier.
-
-The default verifier rejects everything. The demo verifier accepts only the explicit fixture signature. See `docs/FEP_READBACK_CONTRACTS.md`.
+Never put the token map, FEP credentials, receipt-verification keys, private case data, or fulfillment-provider secrets in browser code.
 
 ## Remaining activation gates
 
 1. Production IdP/session and durable tenant membership.
-2. Authenticated live FEP program, cohort, public-card, balance, disposition, and impact endpoints.
-3. Durable Postgres intent/audit persistence with concurrency tests.
-4. Legal, privacy, accounting, and access-policy approval.
-5. Preview verification and recovery drills.
+2. Authenticated live FEP brand, campaign, public-card, request, proof, balance, disposition, priority, and impact endpoints.
+3. Transactional Postgres command/idempotency/audit/post/comment persistence with migration, rollback, and concurrency evidence.
+4. Durable object storage, malware scanning, media moderation, deletion/consent-revocation workflows, and delivery controls.
+5. Fund custody, restricted-ledger, refund/reversal, merchant-settlement, and reconciliation integrations.
+6. Legal, privacy, accounting, tax, payments, accessibility, content, and incident-response approval.
+7. A small capped pilot with explicit stop conditions and no public claim beyond verified readback.
 
-B07 integration additionally waits for A02 and B03 G1 acceptance. This branch evidence is G0 and must not be described as integrated or production-ready.
-
-Even after those gates, the portal creates sponsor preferences only. FEP continues to own named-recipient decisions, reservations, fulfillment, and money authority.
+This release is G0, synthetic, and no-effect. It is neither integrated nor production-ready, and the design documentation is not legal advice.
