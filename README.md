@@ -26,9 +26,11 @@ The in-memory service and fixture receipt verifier are no-effect reference infra
 
 ## B07 A02/B03 compatibility proof
 
-The G0-only adapter in `src/a02B03AllocationAdapter.js` pins the corrected controller release, `CIBOTFLOW/Luzione-API@f2d643a0913b888809c217adfd9bdcef0385b05a`, exactly all five `v0.2-draft.1` identifiers and artifact digests, and `CIBOTFLOW/FEP-Platform@5e9b64528c536b9a5b6b283422a171438f09dd48` with `fep-balanced-journal/v0.1-draft`.
+The G0-only adapters in `src/a02B03AllocationAdapter.js` and `src/b03DurableFundingAdapter.js` pin controller release `3a9c49fb3b7badb8a35eac1502e2ac3fb1be769c`, `CIBOTFLOW/Luzione-API@f2d643a0913b888809c217adfd9bdcef0385b05a`, exactly all five `v0.2-draft.1` identifiers and artifact digests, and durable disposable-PostgreSQL producer `CIBOTFLOW/FEP-Platform@526e513b0698c56fefbf5b5918bb025df73e8e9e` with `fep-balanced-journal/v0.1-draft`.
 
-It accepts only server-derived exact-tenant identity, `DRAFT_ONLY`, `SYNTHETIC_ONLY`, `NO_EFFECT`, domain-committed receipts that grant no effect authority, and fresh source-confirmed readback. The adapter produces deterministic local receipts and cannot write the FEP journal, move money, select a named recipient, approve or deny, resolve an appeal, activate runtime behavior, or migrate production data.
+The Allocation-local compatibility boundary validates the exact B03 journal schema, PIN, rehearsal migration and rollback digests; journal transaction fields; append index and previous/head hashes; durable receipt; replay readback; tenant; balance; and finality. Its concurrency-safe replay claim is deliberately process-local G0 evidence, so it does not satisfy durable Allocation integration.
+
+It accepts only server-derived exact-tenant identity, `DRAFT_ONLY`, `SYNTHETIC_ONLY`, `NO_EFFECT`, domain-committed receipts that grant no effect authority, fresh source-confirmed A02 readback, and valid balanced B03 replay readback. The adapter produces deterministic local receipts and cannot write the FEP journal, persist an allocation or reservation, call a provider, move money, select a named recipient, approve or deny, resolve an appeal, activate runtime behavior, or migrate production data.
 
 Run `npm run proof:b07` for the reproducible fixture packet. A deployed branch may expose the same public-safe vector at `/b07-g0-evidence.json`; deployment metadata, not the file itself, binds it to a commit SHA.
 

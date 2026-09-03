@@ -1,6 +1,7 @@
 {
   "schema_version": "1.0.0",
-  "controller_release": "b626c665d14a7baf419ec2fef42b1ee98b66a370",
+  "controller_release": "3a9c49fb3b7badb8a35eac1502e2ac3fb1be769c",
+  "controller_evidence_decision": "a4b85512f113ff15cfe689347d1c9de0edf98123",
   "adapter_contract": "luzione-fep-allocation-simulation/v0.1-draft",
   "receipt_contract": "luzione-fep-allocation-receipt/v0.1-draft",
   "effect_mode": "DISABLED",
@@ -26,16 +27,23 @@
   },
   "fep": {
     "owner": "CIBOTFLOW/FEP-Platform",
-    "producer_implementation_sha": "5e9b64528c536b9a5b6b283422a171438f09dd48",
-    "pin_sha256": "226d778042db85cc115ac999d202b7e7a3050090ebf306ec3ded0c5f185c53b2",
+    "producer_implementation_sha": "526e513b0698c56fefbf5b5918bb025df73e8e9e",
+    "pin_sha256": "939aa1c8337b2d18295c70a670b006cbc49137a46a46120fa27f420c00637fe6",
     "balanced_journal": "fep-balanced-journal/v0.1-draft",
     "balanced_journal_schema_sha256": "5023cebce38e4bb43a7372aad85bc457c48d9adf62b8ab9ab3d02a26ac0a54c4",
+    "durable_rehearsal_migration_sha256": "e13ea51c501bcc56825af0e7583ec0929d9f3d816acb232b6e2e234b7a299c0f",
+    "durable_rehearsal_rollback_sha256": "3b926e7c8602207d551d05efd03ee308af695e34aa09eeb034735f77d3bff583",
     "policy": "fep-policy-rules-v1",
-    "status": "G0_EFFECT_DISABLED_DRAFT"
+    "receipt_shape": ["disposition", "tenantId", "transactionId", "appendIndex", "previousTransactionHash", "transactionHash", "effectMode"],
+    "readback_shape": ["tenantId", "valid", "transactionCount", "headHash", "balances", "effectMode"],
+    "status": "G0_DURABLE_DISPOSABLE_POSTGRES_PRODUCER_CONSUMED_NO_EFFECT"
   },
   "authority": {
     "write_fep_journal": false,
+    "write_allocation": false,
+    "write_reservation": false,
     "move_money": false,
+    "call_provider": false,
     "select_named_recipient_for_sponsor": false,
     "runtime_activation": false,
     "production_migration": false

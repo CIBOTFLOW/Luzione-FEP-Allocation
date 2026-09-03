@@ -5,13 +5,23 @@ import { CONTRACT_PINS } from '../src/contractPins.js'
 
 const fixture = JSON.parse(readFileSync(new URL('../fixtures/b07/a02-b03-compatible-allocation.json', import.meta.url), 'utf8'))
 const adapter = new A02B03AllocationAdapter()
-const result = adapter.simulate(fixture.input, fixture.now)
+const result = await adapter.simulateAtomic(fixture.input, fixture.now)
+const replay = await adapter.simulateAtomic(fixture.input, fixture.now)
+const rollbackAdapter = new A02B03AllocationAdapter()
+let injectedFailureCode = null
+try {
+  await rollbackAdapter.simulateAtomic(fixture.input, fixture.now, { injectFailureAfterReceipt: true })
+} catch (error) {
+  injectedFailureCode = error.code
+}
 
 const proof = {
   schemaVersion: 'luzione-fep-allocation-b07-proof/v0.1-draft',
   gate: 'G0',
   status: 'ISOLATED_SYNTHETIC_NO_EFFECT',
+  sourceSha: process.env.GITHUB_SHA ?? 'LOCAL_UNBOUND',
   controllerRelease: CONTRACT_PINS.controllerRelease,
+  controllerEvidenceDecision: CONTRACT_PINS.controllerEvidenceDecision,
   producerPins: result.receipt.producerPins,
   artifactSha256: CONTRACT_PINS.apiArtifactSha256,
   fixtureVectors: fixture.expected,
@@ -23,11 +33,34 @@ const proof = {
     balance: result.receipt.balance,
   },
   authority: result.receipt.authority,
-  diagnostics: adapter.diagnostics(),
+  durableB03Readback: result.receipt.evidence,
+  concurrencyReplay: {
+    firstDisposition: result.disposition,
+    duplicateDisposition: replay.disposition,
+    sameReceiptHash: replay.receipt.receiptHash === result.receipt.receiptHash,
+    diagnostics: adapter.diagnostics(),
+  },
+  injectedFailureRollback: {
+    code: injectedFailureCode,
+    diagnostics: rollbackAdapter.diagnostics(),
+    zeroReplayClaim: rollbackAdapter.diagnostics().replayClaims === 0,
+  },
+  automatedNegativeCoverage: [
+    'A02_EXACT_FIVE_PIN_DRIFT',
+    'TENANT_AND_SERVER_IDENTITY',
+    'B03_SCHEMA_AND_PRODUCER_DRIFT',
+    'CONCURRENT_DUPLICATE_AND_IDEMPOTENCY_CONFLICT',
+    'ORDERING_AND_TRANSACTION_HASH_REPLAY',
+    'STALE_FUTURE_PENDING_NONFINAL',
+    'BALANCE_RECEIPT_READBACK_MISMATCH',
+    'FAIRNESS_PRIVACY_APPEAL',
+    'EFFECT_AUTHORITY_INJECTION',
+    'INJECTED_FAILURE_EXACT_ROLLBACK',
+  ],
   blockers: [
     'A02_G1_NOT_ACCEPTED',
     'B03_G1_NOT_ACCEPTED',
-    'DURABLE_REPLAY_NOT_IMPLEMENTED',
+    'ALLOCATION_REPLAY_CLAIMS_PROCESS_LOCAL',
     'LIVE_FEP_INTEGRATION_NOT_RUN',
     'PRODUCTION_G2_NOT_GRANTED',
   ],

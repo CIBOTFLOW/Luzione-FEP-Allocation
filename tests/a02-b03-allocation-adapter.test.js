@@ -24,7 +24,8 @@ function expectCode(run, code) {
 
 test('pin records the corrected controller, exact A02 producer/five artifacts, and exact B03 candidate', () => {
   const pin = JSON.parse(readFileSync(new URL('../contracts/B07_PIN.json', import.meta.url), 'utf8'))
-  assert.equal(pin.controller_release, 'b626c665d14a7baf419ec2fef42b1ee98b66a370')
+  assert.equal(pin.controller_release, '3a9c49fb3b7badb8a35eac1502e2ac3fb1be769c')
+  assert.equal(pin.controller_evidence_decision, 'a4b85512f113ff15cfe689347d1c9de0edf98123')
   assert.equal(pin.api.producer_sha, 'f2d643a0913b888809c217adfd9bdcef0385b05a')
   assert.deepEqual(pin.api.contract_versions, [
     'luzione-shared-contracts/v0.2-draft.1',
@@ -36,10 +37,13 @@ test('pin records the corrected controller, exact A02 producer/five artifacts, a
   assert.deepEqual(pin.api.contract_versions, CONTRACT_PINS.apiContractVersions)
   assert.equal(Object.keys(pin.api.artifact_sha256).length, 5)
   assert.deepEqual(pin.api.artifact_sha256, CONTRACT_PINS.apiArtifactSha256)
-  assert.equal(pin.fep.producer_implementation_sha, '5e9b64528c536b9a5b6b283422a171438f09dd48')
+  assert.equal(pin.fep.producer_implementation_sha, '526e513b0698c56fefbf5b5918bb025df73e8e9e')
   assert.equal(pin.fep.balanced_journal, 'fep-balanced-journal/v0.1-draft')
   assert.equal(pin.effect_mode, 'DISABLED')
   assert.equal(pin.requested_effect, 'NO_EFFECT')
+  assert.equal(pin.fep.pin_sha256, CONTRACT_PINS.fepJournalPinSha256)
+  assert.equal(pin.fep.durable_rehearsal_migration_sha256, CONTRACT_PINS.fepJournalMigrationSha256)
+  assert.equal(pin.fep.durable_rehearsal_rollback_sha256, CONTRACT_PINS.fepJournalRollbackSha256)
 
   const preview = JSON.parse(readFileSync(new URL('../public/b07-g0-evidence.json', import.meta.url), 'utf8'))
   assert.equal(preview.controllerRelease, pin.controller_release)
@@ -183,7 +187,10 @@ test('same command with changed payload is a conflict and cannot mutate the comm
   expectCode(() => adapter.simulate(conflict.input, conflict.now), 'COMMAND_REPLAY_CONFLICT')
   assert.deepEqual(adapter.diagnostics(), {
     committedSimulations: 1,
+    replayClaims: 1,
     fepJournalWrites: 0,
+    allocationWrites: 0,
+    reservationWrites: 0,
     moneyEffects: 0,
     providerEffects: 0,
     runtimeActivations: 0,
@@ -215,7 +222,17 @@ test('fairness labels do not decide allocations, small groups stay private, and 
   const pii = fixture()
   pii.input.command.context.request.correlationId = 'person@example.com'
   pii.input.command.payload.allocationSnapshot.request.correlationId = 'person@example.com'
+  pii.input.command.payload.allocationSnapshot.funding.journalTransaction.correlationId = 'person@example.com'
   pii.input.receipt.correlationId = 'person@example.com'
+  const funding = pii.input.command.payload.allocationSnapshot.funding
+  funding.journalReceipt.transactionHash = hash({
+    ...funding.journalTransaction,
+    appendIndex: funding.journalReceipt.appendIndex,
+    previousTransactionHash: funding.journalReceipt.previousTransactionHash,
+  })
+  funding.journalReadback.headHash = funding.journalReceipt.transactionHash
+  funding.journalHeadHash = funding.journalReceipt.transactionHash
+  funding.sourceReceiptHash = funding.journalReceipt.transactionHash
   rehash(pii)
   expectCode(() => new A02B03AllocationAdapter().simulate(pii.input, pii.now), 'PRIVATE_DATA_PROHIBITED')
 })
@@ -237,10 +254,10 @@ test('receipt and readback identity, object, idempotency, and evidence mismatche
 
 test('B03 version, producer, schema, receipt, balance, and currency mismatch paths fail closed', () => {
   const cases = [
-    [(data) => { data.input.command.payload.allocationSnapshot.funding.contractVersion = 'fep-balanced-journal/v0.2-draft' }, 'FEP_CONTRACT_MISMATCH'],
-    [(data) => { data.input.command.payload.allocationSnapshot.funding.producerSha = '9'.repeat(40) }, 'FEP_CONTRACT_MISMATCH'],
-    [(data) => { data.input.command.payload.allocationSnapshot.funding.schemaSha256 = '9'.repeat(64) }, 'FEP_CONTRACT_MISMATCH'],
-    [(data) => { data.input.command.payload.allocationSnapshot.funding.sourceReceiptHash = 'not-a-digest' }, 'INVALID_HASH'],
+    [(data) => { data.input.command.payload.allocationSnapshot.funding.contractVersion = 'fep-balanced-journal/v0.2-draft' }, 'B03_PRODUCER_PIN_MISMATCH'],
+    [(data) => { data.input.command.payload.allocationSnapshot.funding.producerSha = '9'.repeat(40) }, 'B03_PRODUCER_PIN_MISMATCH'],
+    [(data) => { data.input.command.payload.allocationSnapshot.funding.schemaSha256 = '9'.repeat(64) }, 'B03_PRODUCER_PIN_MISMATCH'],
+    [(data) => { data.input.command.payload.allocationSnapshot.funding.sourceReceiptHash = 'not-a-digest' }, 'B03_SOURCE_RECEIPT_MISMATCH'],
     [(data) => { data.input.command.payload.allocationSnapshot.request.requestedAmountMinor = 601 }, 'INSUFFICIENT_FEP_PROJECTION'],
     [(data) => { data.input.command.payload.allocationSnapshot.request.currency = 'EUR' }, 'CURRENCY_MISMATCH'],
   ]
@@ -277,7 +294,10 @@ test('failure rollback leaves no partial replay claim or effects, and corrected 
   expectCode(() => adapter.simulate(failed.input, failed.now), 'CANDIDATE_CAPACITY_INSUFFICIENT')
   assert.deepEqual(adapter.diagnostics(), {
     committedSimulations: 0,
+    replayClaims: 0,
     fepJournalWrites: 0,
+    allocationWrites: 0,
+    reservationWrites: 0,
     moneyEffects: 0,
     providerEffects: 0,
     runtimeActivations: 0,

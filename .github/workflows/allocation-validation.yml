@@ -22,7 +22,9 @@ jobs:
           node-version: 20
       - run: npm run check
       - name: Build deterministic B07 G0 proof
-        run: npm run proof:b07 > b07-g0-proof.json
+        run: node scripts/b07Proof.js > b07-g0-proof.json
+      - name: Validate exact-SHA proof artifact
+        run: node --input-type=module -e "import { readFileSync } from 'node:fs'; const proof = JSON.parse(readFileSync('b07-g0-proof.json')); if (proof.sourceSha !== process.env.GITHUB_SHA || proof.gate !== 'G0' || proof.injectedFailureRollback.zeroReplayClaim !== true) process.exit(1)"
       - name: Upload exact-SHA B07 proof
         uses: actions/upload-artifact@v4
         with:
