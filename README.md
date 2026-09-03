@@ -24,6 +24,14 @@ It does not let a sponsor select a named recipient, inspect private evidence, ap
 
 The in-memory service and fixture receipt verifier are no-effect reference infrastructure. Production must replace both with authenticated FEP APIs and durable storage.
 
+## B07 A02/B03 compatibility proof
+
+The G0-only adapter in `src/a02B03AllocationAdapter.js` pins the corrected controller release, `CIBOTFLOW/Luzione-API@f2d643a0913b888809c217adfd9bdcef0385b05a`, exactly all five `v0.2-draft.1` identifiers and artifact digests, and `CIBOTFLOW/FEP-Platform@5e9b64528c536b9a5b6b283422a171438f09dd48` with `fep-balanced-journal/v0.1-draft`.
+
+It accepts only server-derived exact-tenant identity, `DRAFT_ONLY`, `SYNTHETIC_ONLY`, `NO_EFFECT`, domain-committed receipts that grant no effect authority, and fresh source-confirmed readback. The adapter produces deterministic local receipts and cannot write the FEP journal, move money, select a named recipient, approve or deny, resolve an appeal, activate runtime behavior, or migrate production data.
+
+Run `npm run proof:b07` for the reproducible fixture packet. A deployed branch may expose the same public-safe vector at `/b07-g0-evidence.json`; deployment metadata, not the file itself, binds it to a commit SHA.
+
 ## Run
 
 ```bash
@@ -76,5 +84,7 @@ The default verifier rejects everything. The demo verifier accepts only the expl
 3. Durable Postgres intent/audit persistence with concurrency tests.
 4. Legal, privacy, accounting, and access-policy approval.
 5. Preview verification and recovery drills.
+
+B07 integration additionally waits for A02 and B03 G1 acceptance. This branch evidence is G0 and must not be described as integrated or production-ready.
 
 Even after those gates, the portal creates sponsor preferences only. FEP continues to own named-recipient decisions, reservations, fulfillment, and money authority.

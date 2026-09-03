@@ -1,0 +1,169 @@
+{
+  "input": {
+    "pinnedContractVersions": [
+      "luzione-shared-contracts/v0.2-draft.1",
+      "luzione-identity-tenant/v0.2-draft.1",
+      "luzione-command-envelope/v0.2-draft.1",
+      "luzione-receipt-envelope/v0.2-draft.1",
+      "luzione-readback-envelope/v0.2-draft.1"
+    ],
+    "command": {
+      "contractVersion": "luzione-command-envelope/v0.2-draft.1",
+      "activation": "DRAFT_ONLY",
+      "commandId": "cmd-b07-synthetic-1",
+      "commandType": "fep.allocation.simulate",
+      "context": {
+        "contractVersion": "luzione-identity-tenant/v0.2-draft.1",
+        "serverDerived": true,
+        "request": {
+          "requestId": "req-b07-synthetic-1",
+          "correlationId": "corr-b07-synthetic-1",
+          "traceId": "11111111111111111111111111111111",
+          "spanId": "2222222222222222",
+          "requestedAt": "2026-09-03T03:28:00.000Z"
+        },
+        "credentialActor": {
+          "actorId": "svc-luzione-api",
+          "actorType": "service",
+          "credentialSource": "vercel-oidc"
+        },
+        "logicalActor": null,
+        "tenant": {
+          "tenantId": "tenant-acme",
+          "source": "VERIFIED_CREDENTIAL",
+          "boundary": "EXACT"
+        },
+        "authority": {
+          "authorityClass": "INTERNAL_DRAFT",
+          "capability": "fep.allocation.simulate",
+          "purpose": "synthetic-b07-compatibility"
+        },
+        "sourceVersionRefs": ["authority-subject/v0.1", "request-identity/v1"]
+      },
+      "expectedObjectVersion": "new-simulation",
+      "idempotencyKey": "idem-b07-synthetic-1",
+      "payload": {
+        "simulationMode": "SYNTHETIC_ONLY",
+        "allocationSnapshot": {
+          "runAt": "2026-09-03T03:29:00.000Z",
+          "request": {
+            "requestId": "req-b07-synthetic-1",
+            "tenantId": "tenant-acme",
+            "idempotencyKey": "idem-b07-synthetic-1",
+            "correlationId": "corr-b07-synthetic-1",
+            "requestedAmountMinor": 600,
+            "currency": "USD"
+          },
+          "funding": {
+            "contractVersion": "fep-balanced-journal/v0.1-draft",
+            "producerSha": "5e9b64528c536b9a5b6b283422a171438f09dd48",
+            "schemaSha256": "5023cebce38e4bb43a7372aad85bc457c48d9adf62b8ab9ab3d02a26ac0a54c4",
+            "journalHeadHash": "3333333333333333333333333333333333333333333333333333333333333333",
+            "sourceReceiptHash": "4444444444444444444444444444444444444444444444444444444444444444",
+            "availableMinor": 600,
+            "currency": "USD",
+            "asOf": "2026-09-03T03:25:00.000Z"
+          },
+          "policy": {
+            "contractVersion": "fep-policy-rules-v1",
+            "policyVersion": "policy-b07-a02-b03-v1",
+            "policyHash": "5555555555555555555555555555555555555555555555555555555555555555",
+            "eligiblePopulationHash": "6666666666666666666666666666666666666666666666666666666666666666",
+            "minimumGroupSize": 2,
+            "validUntil": "2026-09-04T03:29:00.000Z"
+          },
+          "candidates": [
+            {
+              "eligibilityRef": "elig_aaaaaaaaaaaa",
+              "priorityUnits": 3,
+              "maximumAllocationMinor": 600,
+              "fairnessGroup": "broad-region-a"
+            },
+            {
+              "eligibilityRef": "elig_bbbbbbbbbbbb",
+              "priorityUnits": 2,
+              "maximumAllocationMinor": 600,
+              "fairnessGroup": "broad-region-a"
+            },
+            {
+              "eligibilityRef": "elig_cccccccccccc",
+              "priorityUnits": 1,
+              "maximumAllocationMinor": 600,
+              "fairnessGroup": "broad-region-b"
+            }
+          ]
+        }
+      },
+      "payloadHash": "0e00851a4e72762aa9389d84dd6a748d387685c7fbb89f26c0b5265d1ebc7b2b",
+      "policyVersionRefs": ["fep-policy-rules-v1"],
+      "requestedAt": "2026-09-03T03:28:00.000Z",
+      "requestedEffect": {
+        "effectClass": "NO_EFFECT",
+        "authorizationRef": null
+      },
+      "target": {
+        "ownerProject": "CIBOTFLOW/Luzione-FEP-Allocation",
+        "objectType": "fep-allocation-simulation",
+        "objectId": "req-b07-synthetic-1",
+        "objectVersion": "luzione-fep-allocation-simulation/v0.1-draft"
+      }
+    },
+    "receipt": {
+      "contractVersion": "luzione-receipt-envelope/v0.2-draft.1",
+      "receiptId": "receipt-b07-synthetic-1",
+      "commandId": "cmd-b07-synthetic-1",
+      "correlationId": "corr-b07-synthetic-1",
+      "tenantId": "tenant-acme",
+      "state": "DOMAIN_COMMITTED",
+      "effectAuthority": "NOT_GRANTED_BY_CONTRACT",
+      "idempotency": {
+        "key": "idem-b07-synthetic-1",
+        "payloadHash": "0e00851a4e72762aa9389d84dd6a748d387685c7fbb89f26c0b5265d1ebc7b2b",
+        "replay": false
+      },
+      "object": {
+        "ownerProject": "CIBOTFLOW/Luzione-FEP-Allocation",
+        "type": "fep-allocation-simulation",
+        "id": "req-b07-synthetic-1",
+        "version": "luzione-fep-allocation-simulation/v0.1-draft"
+      },
+      "evidence": {
+        "eventId": "evt-b07-domain-1",
+        "outboxMessageId": "outbox-b07-synthetic-1"
+      }
+    },
+    "readback": {
+      "contractVersion": "luzione-readback-envelope/v0.2-draft.1",
+      "tenantId": "tenant-acme",
+      "finality": "SOURCE_CONFIRMED",
+      "businessFinal": true,
+      "freshness": {
+        "state": "FRESH",
+        "observedAt": "2026-09-03T03:29:30.000Z",
+        "freshUntil": "2026-09-03T03:35:00.000Z"
+      },
+      "object": {
+        "ownerProject": "CIBOTFLOW/Luzione-FEP-Allocation",
+        "type": "fep-allocation-simulation",
+        "id": "req-b07-synthetic-1",
+        "version": "luzione-fep-allocation-simulation/v0.1-draft"
+      },
+      "evidence": {
+        "receiptId": "receipt-b07-synthetic-1",
+        "commandId": "cmd-b07-synthetic-1",
+        "eventId": "evt-b07-domain-1",
+        "providerAcknowledgementRef": null,
+        "reconciliationId": "recon-b07-synthetic-1",
+        "sourceReadbackRef": "source-readback-b07-synthetic-1"
+      },
+      "reason": "Synthetic source fixture confirms the bounded allocation simulation."
+    }
+  },
+  "now": "2026-09-03T03:30:00.000Z",
+  "expected": {
+    "payloadHash": "0e00851a4e72762aa9389d84dd6a748d387685c7fbb89f26c0b5265d1ebc7b2b",
+    "innerSnapshotHash": "26a2d6443abff1acd68745f5adf787b4b1109ea68f9c257c0156f9d45ba0599c",
+    "allocationReceiptHash": "55c61b8bd5db03be3939b3a8a0f41bb41238c4c9a61088f48803b462e57d3384",
+    "adapterReceiptHash": "2518bbcaad60c80f72fddc6cd2f2abe9df4025604871c37cef08581d9030b61c"
+  }
+}

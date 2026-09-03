@@ -10,6 +10,7 @@ const ASSETS = new Map([
   ['/', { file: '../public/index.html', type: 'text/html; charset=utf-8' }],
   ['/app.js', { file: '../public/app.js', type: 'text/javascript; charset=utf-8' }],
   ['/styles.css', { file: '../public/styles.css', type: 'text/css; charset=utf-8' }],
+  ['/b07-g0-evidence.json', { file: '../public/b07-g0-evidence.json', type: 'application/json; charset=utf-8' }],
 ])
 
 function securityHeaders(contentType, cacheControl = 'no-store') {

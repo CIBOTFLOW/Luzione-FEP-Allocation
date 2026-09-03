@@ -1,20 +1,33 @@
 {
   "schema_version": "1.0.0",
-  "controller_release": "19cf3a752f761a632349ab2581efc2730a557964",
+  "controller_release": "b626c665d14a7baf419ec2fef42b1ee98b66a370",
   "adapter_contract": "luzione-fep-allocation-simulation/v0.1-draft",
   "receipt_contract": "luzione-fep-allocation-receipt/v0.1-draft",
   "effect_mode": "DISABLED",
+  "requested_effect": "NO_EFFECT",
   "api": {
     "owner": "CIBOTFLOW/Luzione-API",
-    "producer_sha": null,
-    "identity": "luzione-request-identity/v1",
-    "command": "luzione-command-ledger/v0.1",
-    "readback": "luzione-causal-readback/v0.1",
-    "status": "TRANSITIONAL_DRAFT_PIN_INTEGRATION_BLOCKED"
+    "producer_sha": "f2d643a0913b888809c217adfd9bdcef0385b05a",
+    "contract_versions": [
+      "luzione-shared-contracts/v0.2-draft.1",
+      "luzione-identity-tenant/v0.2-draft.1",
+      "luzione-command-envelope/v0.2-draft.1",
+      "luzione-receipt-envelope/v0.2-draft.1",
+      "luzione-readback-envelope/v0.2-draft.1"
+    ],
+    "artifact_sha256": {
+      "contracts/drafts/luzione-shared-contracts-v0.2-draft.1.manifest.json": "d0971d0cf9aaf3f1037ef0165de4960f16aa93e13db4e033e9602a4c7a265f41",
+      "contracts/drafts/identity-tenant-v0.2-draft.1.schema.json": "38a6f9b89c87df3491cbddbc7bb73e964e86a1afe1917a1751fe67814ed0506e",
+      "contracts/drafts/command-envelope-v0.2-draft.1.schema.json": "aaed7baa30a4fc904f15bd8ac7076138442e9a33d8f57a49332a3a68e22cc205",
+      "contracts/drafts/receipt-envelope-v0.2-draft.1.schema.json": "ca358428fa144fa10da10d26d67649c76bb6a271171f55501f15cc9cd63123bf",
+      "contracts/drafts/readback-envelope-v0.2-draft.1.schema.json": "f40f42640b4c7c8c2149b9845b10e74e59911bc3c610ccaa7195a33c6b014b0c"
+    },
+    "status": "G0_EXACT_DRAFT_PIN_INTEGRATION_BLOCKED"
   },
   "fep": {
     "owner": "CIBOTFLOW/FEP-Platform",
-    "producer_implementation_sha": "e8490fb606d6c8534180bb0412186534143cc510",
+    "producer_implementation_sha": "5e9b64528c536b9a5b6b283422a171438f09dd48",
+    "pin_sha256": "226d778042db85cc115ac999d202b7e7a3050090ebf306ec3ded0c5f185c53b2",
     "balanced_journal": "fep-balanced-journal/v0.1-draft",
     "balanced_journal_schema_sha256": "5023cebce38e4bb43a7372aad85bc457c48d9adf62b8ab9ab3d02a26ac0a54c4",
     "policy": "fep-policy-rules-v1",
@@ -23,6 +36,8 @@
   "authority": {
     "write_fep_journal": false,
     "move_money": false,
-    "select_named_recipient_for_sponsor": false
+    "select_named_recipient_for_sponsor": false,
+    "runtime_activation": false,
+    "production_migration": false
   }
 }

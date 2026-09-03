@@ -21,3 +21,12 @@ jobs:
         with:
           node-version: 20
       - run: npm run check
+      - name: Build deterministic B07 G0 proof
+        run: npm run proof:b07 > b07-g0-proof.json
+      - name: Upload exact-SHA B07 proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: b07-g0-proof-${{ github.sha }}
+          path: b07-g0-proof.json
+          if-no-files-found: error
+          retention-days: 30

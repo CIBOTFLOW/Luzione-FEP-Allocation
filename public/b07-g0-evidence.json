@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "luzione-fep-allocation-b07-preview/v0.1-draft",
+  "gate": "G0",
+  "status": "ISOLATED_SYNTHETIC_NO_EFFECT",
+  "controllerRelease": "b626c665d14a7baf419ec2fef42b1ee98b66a370",
+  "producerPins": {
+    "api": "CIBOTFLOW/Luzione-API@f2d643a0913b888809c217adfd9bdcef0385b05a",
+    "apiContractVersions": [
+      "luzione-shared-contracts/v0.2-draft.1",
+      "luzione-identity-tenant/v0.2-draft.1",
+      "luzione-command-envelope/v0.2-draft.1",
+      "luzione-receipt-envelope/v0.2-draft.1",
+      "luzione-readback-envelope/v0.2-draft.1"
+    ],
+    "fep": "CIBOTFLOW/FEP-Platform@5e9b64528c536b9a5b6b283422a171438f09dd48",
+    "fepJournalContract": "fep-balanced-journal/v0.1-draft"
+  },
+  "fixtureVectors": {
+    "payloadHash": "0e00851a4e72762aa9389d84dd6a748d387685c7fbb89f26c0b5265d1ebc7b2b",
+    "innerSnapshotHash": "26a2d6443abff1acd68745f5adf787b4b1109ea68f9c257c0156f9d45ba0599c",
+    "allocationReceiptHash": "55c61b8bd5db03be3939b3a8a0f41bb41238c4c9a61088f48803b462e57d3384",
+    "adapterReceiptHash": "2518bbcaad60c80f72fddc6cd2f2abe9df4025604871c37cef08581d9030b61c"
+  },
+  "balance": {
+    "requestedMinor": 600,
+    "allocatedMinor": 600,
+    "balanced": true,
+    "currency": "USD"
+  },
+  "authority": {
+    "syntheticOnly": true,
+    "writeFepJournal": false,
+    "moveMoney": false,
+    "approveOrDeny": false,
+    "selectNamedRecipientForSponsor": false,
+    "resolveAppeal": false,
+    "runtimeActivation": false,
+    "productionMigration": false
+  },
+  "integrated": false,
+  "productionReady": false
+}

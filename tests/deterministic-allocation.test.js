@@ -18,13 +18,14 @@ function withCurrentHash(envelope) {
 test('repository pin matches explicit API and exact FEP journal draft versions', () => {
   const pin = JSON.parse(readFileSync(new URL('../contracts/B07_PIN.json', import.meta.url), 'utf8'))
   assert.equal(pin.controller_release, CONTRACT_PINS.controllerRelease)
-  assert.equal(pin.api.identity, CONTRACT_PINS.identityContract)
-  assert.equal(pin.api.command, CONTRACT_PINS.commandContract)
-  assert.equal(pin.api.readback, CONTRACT_PINS.readbackContract)
-  assert.equal(pin.api.producer_sha, null)
+  assert.equal(pin.api.producer_sha, CONTRACT_PINS.apiProducerSha)
+  assert.deepEqual(pin.api.contract_versions, CONTRACT_PINS.apiContractVersions)
+  assert.deepEqual(pin.api.artifact_sha256, CONTRACT_PINS.apiArtifactSha256)
   assert.equal(pin.fep.producer_implementation_sha, CONTRACT_PINS.fepJournalProducerSha)
+  assert.equal(pin.fep.pin_sha256, CONTRACT_PINS.fepJournalPinSha256)
   assert.equal(pin.fep.balanced_journal_schema_sha256, CONTRACT_PINS.fepJournalSchemaSha256)
   assert.equal(pin.authority.write_fep_journal, false)
+  assert.equal(pin.authority.runtime_activation, false)
 })
 
 test('fixture produces a deterministic, balanced, effect-disabled allocation receipt', () => {

@@ -4,7 +4,7 @@
     "effectMode": "DISABLED",
     "runAt": "2026-09-02T20:00:00.000Z",
     "identity": {
-      "contractVersion": "luzione-request-identity/v1",
+      "contractVersion": "luzione-identity-tenant/v0.2-draft.1",
       "tenantId": "tenant-acme",
       "actorIdHash": "1111111111111111111111111111111111111111111111111111111111111111",
       "scopes": ["allocation:simulate"],
@@ -17,12 +17,12 @@
       "correlationId": "b07-correlation-1",
       "requestedAmountMinor": 600,
       "currency": "USD",
-      "commandContractVersion": "luzione-command-ledger/v0.1",
-      "readbackContractVersion": "luzione-causal-readback/v0.1"
+      "commandContractVersion": "luzione-command-envelope/v0.2-draft.1",
+      "readbackContractVersion": "luzione-readback-envelope/v0.2-draft.1"
     },
     "funding": {
       "contractVersion": "fep-balanced-journal/v0.1-draft",
-      "producerSha": "e8490fb606d6c8534180bb0412186534143cc510",
+      "producerSha": "5e9b64528c536b9a5b6b283422a171438f09dd48",
       "schemaSha256": "5023cebce38e4bb43a7372aad85bc457c48d9adf62b8ab9ab3d02a26ac0a54c4",
       "journalHeadHash": "2222222222222222222222222222222222222222222222222222222222222222",
       "sourceReceiptHash": "3333333333333333333333333333333333333333333333333333333333333333",
@@ -59,6 +59,6 @@
       }
     ]
   },
-  "snapshotHash": "13ed4013dca9a9ed598b28556c88abf7b74f25635c14be24b7af6db3b3b61567",
-  "expectedReceiptHash": "ec82752580df28a7ad6e9b00b579d77d03668964ddd29f0ceb25cf90595ccb5c"
+  "snapshotHash": "7a66f9c02da47c528fb992ee152ed17784726f6d65905325d973e13882faab2e",
+  "expectedReceiptHash": "6de49080cbbca965ab901e0349772e6885d9dbe65a39ed057539383f19fda79b"
 }
