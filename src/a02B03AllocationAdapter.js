@@ -1,5 +1,6 @@
 import { AllocationError, hash } from './canonical.js'
 import { AtomicNoEffectReplayClaims, validateDurableB03Funding } from './b03DurableFundingAdapter.js'
+import { validateFepPostCommitEvidence } from './b03PostCommitEvidenceAdapter.js'
 import { CONTRACT_PINS } from './contractPins.js'
 import { DeterministicAllocationEngine, hashAllocationSnapshot } from './deterministicAllocator.js'
 
@@ -45,10 +46,6 @@ function assertDigest(value, label) {
   if (typeof value !== 'string' || !/^[a-f0-9]{64}$/.test(value)) {
     fail('SCHEMA_VALUE_INVALID', label + ' must be a lowercase SHA-256 digest')
   }
-}
-
-function assertSame(left, right, code, message) {
-  if (hash(left) !== hash(right)) fail(code, message, 409)
 }
 
 function validatePinSet(actual) {
@@ -174,10 +171,11 @@ function validateCommand(command) {
   if (
     command.target.ownerProject !== 'CIBOTFLOW/Luzione-FEP-Allocation' ||
     command.target.objectType !== 'fep-allocation-simulation' ||
-    command.target.objectVersion !== CONTRACT_PINS.adapterContract ||
+    command.target.objectVersion !== command.expectedObjectVersion ||
+    command.expectedObjectVersion !== CONTRACT_PINS.allocationGenesisObjectVersion ||
     command.target.objectId !== request?.requestId
   ) {
-    fail('TARGET_BINDING_MISMATCH', 'command target does not identify the local allocation simulation', 409)
+    fail('TARGET_BINDING_MISMATCH', 'command target does not identify the exact pre-command Allocation object version', 409)
   }
   if (
     command.context.tenant.tenantId !== request.tenantId ||
@@ -188,80 +186,8 @@ function validateCommand(command) {
   }
 }
 
-function validateReceipt(command, receipt) {
-  assertExactKeys(receipt, [
-    'contractVersion', 'receiptId', 'commandId', 'correlationId', 'tenantId', 'state',
-    'effectAuthority', 'idempotency', 'object', 'evidence',
-  ], 'receipt')
-  if (receipt.contractVersion !== CONTRACT_PINS.receiptEnvelopeContract) {
-    fail('CONTRACT_VERSION_MISMATCH', 'receipt contract version is not pinned', 409)
-  }
-  if (receipt.state !== 'DOMAIN_COMMITTED') fail('DOMAIN_COMMIT_REQUIRED', 'dispatch-pending receipts are rejected', 409)
-  if (receipt.effectAuthority !== 'NOT_GRANTED_BY_CONTRACT') {
-    fail('EFFECT_AUTHORITY_FORBIDDEN', 'receipt cannot grant effect authority', 403)
-  }
-  assertText(receipt.receiptId, 'receipt.receiptId')
-  assertExactKeys(receipt.idempotency, ['key', 'payloadHash', 'replay'], 'receipt.idempotency')
-  if (typeof receipt.idempotency.replay !== 'boolean') fail('SCHEMA_VALUE_INVALID', 'receipt.idempotency.replay must be boolean')
-  assertExactKeys(receipt.object, ['ownerProject', 'type', 'id', 'version'], 'receipt.object')
-  assertExactKeys(receipt.evidence, ['eventId', 'outboxMessageId'], 'receipt.evidence')
-  assertText(receipt.evidence.eventId, 'receipt.evidence.eventId')
-  assertText(receipt.evidence.outboxMessageId, 'receipt.evidence.outboxMessageId')
-  if (
-    receipt.commandId !== command.commandId ||
-    receipt.correlationId !== command.context.request.correlationId ||
-    receipt.tenantId !== command.context.tenant.tenantId
-  ) {
-    fail('RECEIPT_CONTEXT_DRIFT', 'receipt does not close the command tenant and correlation context', 409)
-  }
-  if (receipt.idempotency.key !== command.idempotencyKey || receipt.idempotency.payloadHash !== command.payloadHash) {
-    fail('RECEIPT_IDEMPOTENCY_DRIFT', 'receipt does not close the command idempotency binding', 409)
-  }
-  assertSame(receipt.object, {
-    ownerProject: command.target.ownerProject,
-    type: command.target.objectType,
-    id: command.target.objectId,
-    version: command.target.objectVersion,
-  }, 'RECEIPT_OBJECT_DRIFT', 'receipt object does not close the command target')
-}
-
-function validateReadback(receipt, readback, now) {
-  assertExactKeys(readback, ['contractVersion', 'tenantId', 'finality', 'businessFinal', 'freshness', 'object', 'evidence', 'reason'], 'readback')
-  if (readback.contractVersion !== CONTRACT_PINS.readbackContract) {
-    fail('CONTRACT_VERSION_MISMATCH', 'readback contract version is not pinned', 409)
-  }
-  if (readback.tenantId !== receipt.tenantId) fail('READBACK_TENANT_DRIFT', 'readback tenant does not close the receipt', 409)
-  if (readback.finality !== 'SOURCE_CONFIRMED' || readback.businessFinal !== true) {
-    fail('SOURCE_FINALITY_REQUIRED', 'only source-confirmed business-final readback is accepted', 409)
-  }
-  assertExactKeys(readback.freshness, ['state', 'observedAt', 'freshUntil'], 'readback.freshness')
-  assertTimestamp(now, 'now')
-  if (readback.freshness.state !== 'FRESH' || !readback.freshness.observedAt || !readback.freshness.freshUntil) {
-    fail('FRESH_READBACK_REQUIRED', 'source-confirmed readback must be fresh and bounded', 409)
-  }
-  assertTimestamp(readback.freshness.observedAt, 'readback.freshness.observedAt')
-  assertTimestamp(readback.freshness.freshUntil, 'readback.freshness.freshUntil')
-  if (Date.parse(readback.freshness.observedAt) > Date.parse(now) || Date.parse(readback.freshness.freshUntil) < Date.parse(now)) {
-    fail('FRESH_READBACK_REQUIRED', 'readback freshness window does not include validation time', 409)
-  }
-  assertExactKeys(readback.object, ['ownerProject', 'type', 'id', 'version'], 'readback.object')
-  assertSame(readback.object, receipt.object, 'READBACK_OBJECT_DRIFT', 'readback object does not close the receipt object')
-  assertExactKeys(readback.evidence, [
-    'receiptId', 'commandId', 'eventId', 'providerAcknowledgementRef', 'reconciliationId', 'sourceReadbackRef',
-  ], 'readback.evidence')
-  if (
-    readback.evidence.receiptId !== receipt.receiptId ||
-    readback.evidence.commandId !== receipt.commandId ||
-    readback.evidence.eventId !== receipt.evidence.eventId
-  ) {
-    fail('READBACK_EVIDENCE_DRIFT', 'readback evidence does not close the receipt and command', 409)
-  }
-  assertText(readback.evidence.sourceReadbackRef, 'readback.evidence.sourceReadbackRef')
-  assertText(readback.reason, 'readback.reason')
-}
-
 function engineEnvelope(input) {
-  const { command, readback } = input
+  const { command, fepPostCommit } = input
   const source = command.payload.allocationSnapshot
   const snapshot = {
     schemaVersion: CONTRACT_PINS.adapterContract,
@@ -272,12 +198,12 @@ function engineEnvelope(input) {
       tenantId: command.context.tenant.tenantId,
       actorIdHash: hash(command.context.credentialActor),
       scopes: ['allocation:simulate'],
-      expiresAt: readback.freshness.freshUntil,
+      expiresAt: fepPostCommit.output.readback.freshness.freshUntil,
     },
     request: {
       ...source.request,
       commandContractVersion: command.contractVersion,
-      readbackContractVersion: readback.contractVersion,
+      readbackContractVersion: fepPostCommit.output.readback.contractVersion,
     },
     funding: source.funding,
     policy: source.policy,
@@ -287,11 +213,19 @@ function engineEnvelope(input) {
 }
 
 function validateCompatibilityInput(input, now) {
+  if (Object.hasOwn(input ?? {}, 'receipt') || Object.hasOwn(input ?? {}, 'readback')) {
+    fail('CALLER_PREMINTED_FINALITY_FORBIDDEN', 'Allocation input cannot contain caller-minted receipt or readback finality', 403)
+  }
+  assertExactKeys(input, ['pinnedContractVersions', 'command', 'fepPostCommit'], 'compatibilityInput')
   validatePinSet(input.pinnedContractVersions)
   validateCommand(input.command)
-  validateReceipt(input.command, input.receipt)
-  validateReadback(input.receipt, input.readback, now)
   const durableFunding = validateDurableB03Funding(
+    input.command.payload.allocationSnapshot.funding,
+    input.command.context,
+    now,
+  )
+  const fepPostCommit = validateFepPostCommitEvidence(
+    input.fepPostCommit,
     input.command.payload.allocationSnapshot.funding,
     input.command.context,
     now,
@@ -300,10 +234,11 @@ function validateCompatibilityInput(input, now) {
     compatibilityInputHash: hash(input),
     commandKey: `${input.command.context.tenant.tenantId}:${input.command.commandId}`,
     durableFunding,
+    fepPostCommit,
   }
 }
 
-function buildReceipt(input, compatibilityInputHash, durableFunding) {
+function buildReceipt(input, compatibilityInputHash, durableFunding, fepPostCommit) {
   const allocation = new DeterministicAllocationEngine().simulate(engineEnvelope(input)).receipt
   if (allocation.allocatedMinor !== input.command.payload.allocationSnapshot.request.requestedAmountMinor) {
     fail('ALLOCATION_BALANCE_MISMATCH', 'allocation receipt does not balance to the requested amount', 409)
@@ -314,24 +249,31 @@ function buildReceipt(input, compatibilityInputHash, durableFunding) {
     compatibilityInputHash,
     producerPins: {
       api: `${CONTRACT_PINS.apiRepository}@${CONTRACT_PINS.apiProducerSha}`,
+      apiFinalEvidenceSha: CONTRACT_PINS.apiFinalEvidenceSha,
       apiContractVersions: CONTRACT_PINS.apiContractVersions,
+      apiManifestDigests: CONTRACT_PINS.apiManifestDigests,
       fep: `${CONTRACT_PINS.fepRepository}@${CONTRACT_PINS.fepJournalProducerSha}`,
       fepJournalContract: CONTRACT_PINS.fepJournalContract,
       fepPinSha256: CONTRACT_PINS.fepJournalPinSha256,
       fepSchemaSha256: CONTRACT_PINS.fepJournalSchemaSha256,
       fepMigrationSha256: CONTRACT_PINS.fepJournalMigrationSha256,
       fepRollbackSha256: CONTRACT_PINS.fepJournalRollbackSha256,
+      fepJournalFixtureSha256: CONTRACT_PINS.fepJournalFixtureSha256,
     },
     evidence: {
       commandId: input.command.commandId,
-      upstreamReceiptId: input.receipt.receiptId,
-      sourceReadbackRef: input.readback.evidence.sourceReadbackRef,
+      upstreamReceiptId: fepPostCommit.receiptId,
+      sourceReadbackRef: fepPostCommit.sourceReadbackRef,
       fepJournalHeadHash: durableFunding.replayHeadHash,
       fepSourceReceiptHash: input.command.payload.allocationSnapshot.funding.sourceReceiptHash,
       fepAppendIndex: durableFunding.appendIndex,
       fepSourceSequence: durableFunding.sourceSequence,
       fepReceiptDisposition: durableFunding.receiptDisposition,
       fepReplayValid: durableFunding.replayValid,
+      fepPreCommandObjectVersion: fepPostCommit.preCommandObjectVersion,
+      fepCommittedObjectVersion: fepPostCommit.committedObjectVersion,
+      fepSourceConfirmed: fepPostCommit.sourceConfirmed,
+      fepBusinessFinal: fepPostCommit.businessFinal,
     },
     balance: {
       requestedMinor: input.command.payload.allocationSnapshot.request.requestedAmountMinor,
@@ -342,6 +284,13 @@ function buildReceipt(input, compatibilityInputHash, durableFunding) {
     allocation,
     effectMode: CONTRACT_PINS.effectMode,
     requestedEffect: CONTRACT_PINS.requestedEffect,
+    objectVersionTransition: {
+      preCommandObjectVersion: input.command.expectedObjectVersion,
+      committedObjectVersion: `luzione-fep-allocation-simulation/sha256:${hash({
+        compatibilityInputHash,
+        allocationReceiptHash: allocation.receiptHash,
+      })}`,
+    },
     authority: {
       syntheticOnly: true,
       writeFepJournal: false,
@@ -366,7 +315,7 @@ export class A02B03AllocationAdapter {
   }
 
   simulate(input, now) {
-    const { compatibilityInputHash, commandKey, durableFunding } = validateCompatibilityInput(input, now)
+    const { compatibilityInputHash, commandKey, durableFunding, fepPostCommit } = validateCompatibilityInput(input, now)
     const previous = this.commands.get(commandKey)
     if (previous) {
       if (previous.inputHash !== compatibilityInputHash) {
@@ -375,15 +324,15 @@ export class A02B03AllocationAdapter {
       return immutableClone({ disposition: 'REPLAYED', receipt: previous.receipt })
     }
 
-    const receipt = buildReceipt(input, compatibilityInputHash, durableFunding)
+    const receipt = buildReceipt(input, compatibilityInputHash, durableFunding, fepPostCommit)
     this.commands.set(commandKey, { inputHash: compatibilityInputHash, receipt })
     return immutableClone({ disposition: 'SIMULATED', receipt })
   }
 
   async simulateAtomic(input, now, options = {}) {
-    const { compatibilityInputHash, commandKey, durableFunding } = validateCompatibilityInput(input, now)
+    const { compatibilityInputHash, commandKey, durableFunding, fepPostCommit } = validateCompatibilityInput(input, now)
     return this.atomicClaims.transact(commandKey, compatibilityInputHash, async () => {
-      const receipt = buildReceipt(input, compatibilityInputHash, durableFunding)
+      const receipt = buildReceipt(input, compatibilityInputHash, durableFunding, fepPostCommit)
       if (options.injectFailureAfterReceipt === true) {
         fail('INJECTED_FAILURE_ROLLBACK', 'synthetic failure injected before the replay claim commit', 503)
       }

@@ -1,11 +1,12 @@
 {
-  "schemaVersion": "luzione-fep-allocation-b07-preview/v0.1-draft",
+  "schemaVersion": "luzione-fep-allocation-b07-preview/v0.2-draft",
   "gate": "G0",
   "status": "ISOLATED_SYNTHETIC_NO_EFFECT",
-  "controllerRelease": "3a9c49fb3b7badb8a35eac1502e2ac3fb1be769c",
-  "controllerEvidenceDecision": "a4b85512f113ff15cfe689347d1c9de0edf98123",
+  "controllerRelease": "b43e5a65c0ae8c8bcef7e015e4a3484877f736b0",
+  "controllerEvidence": "evidence/SYNC_REVIEW_20260903T234455Z.md",
   "producerPins": {
-    "api": "CIBOTFLOW/Luzione-API@f2d643a0913b888809c217adfd9bdcef0385b05a",
+    "api": "CIBOTFLOW/Luzione-API@12685f46a60edea23aaa0a5403e300bf8858066b",
+    "apiFinalEvidenceSha": "bc43d5db8fe58230d6c3d35e32a73e1e8618b71e",
     "apiContractVersions": [
       "luzione-shared-contracts/v0.2-draft.1",
       "luzione-identity-tenant/v0.2-draft.1",
@@ -13,30 +14,43 @@
       "luzione-receipt-envelope/v0.2-draft.1",
       "luzione-readback-envelope/v0.2-draft.1"
     ],
-    "fep": "CIBOTFLOW/FEP-Platform@526e513b0698c56fefbf5b5918bb025df73e8e9e",
+    "apiManifestDigests": {
+      "rawFile": {
+        "algorithm": "sha256-raw-file-v1",
+        "sha256": "2d7479019d04d24344b1d4bf4d953abee2d3382ed56b8201ebb49289253e00b7"
+      },
+      "canonicalJson": {
+        "algorithm": "sha256-canonical-json-recursive-key-sort-v1",
+        "sha256": "eaf983e1496187a22688ddfed45b541fe88a3e2b70a2fbc60863fae1a9484208"
+      }
+    },
+    "fep": "CIBOTFLOW/FEP-Platform@5db6cc8772c40a7127b7514c57787299ddad57a5",
     "fepJournalContract": "fep-balanced-journal/v0.1-draft",
-    "fepPinSha256": "939aa1c8337b2d18295c70a670b006cbc49137a46a46120fa27f420c00637fe6",
+    "fepPinSha256": "931dc8d0e78547eadfcc123675df86f63e024615083352c43961ebeaa28387b5",
     "fepSchemaSha256": "5023cebce38e4bb43a7372aad85bc457c48d9adf62b8ab9ab3d02a26ac0a54c4",
+    "fepFixtureSha256": "57f17445caaa13efe9aeb9a3316bae83adade99d800d81159bdb78556cddd016",
     "fepMigrationSha256": "e13ea51c501bcc56825af0e7583ec0929d9f3d816acb232b6e2e234b7a299c0f",
     "fepRollbackSha256": "3b926e7c8602207d551d05efd03ee308af695e34aa09eeb034735f77d3bff583"
   },
   "fixtureVectors": {
-    "payloadHash": "52cf0acda564cec8508d1d1752906a6fdd511009ae4b472a844527f383dc2db1",
-    "innerSnapshotHash": "e3f42958b35015a32f3f75ba0899a41f967f09363486717db666b7df8717bdf2",
-    "allocationReceiptHash": "e9e65a7d1f4b28a9b68adce9c3dac4bdee6387613cdd43550138533f6fdce354",
-    "adapterReceiptHash": "11856c72203ecdd8e62b3ad992a1022914e84a3316179e4dc029d54ef79f0970"
+    "payloadHash": "e74e3ba569b5ead1e6c13f2faf3a9c0fa6f3c44d79eab4db584b26b34c756830",
+    "innerSnapshotHash": "df13645538803434c0ea93c291e902ac0f578fcc22c6ee07f6923da1b47815e1",
+    "allocationReceiptHash": "c426dab2b02a6bd181da3fe7b842e86c971757dab1e6749faa656f59bc3258de",
+    "adapterReceiptHash": "880e428c3036234e3613edbac39e2b6ad6cad9c740ca133ffc5e60d83e074480"
   },
-  "durableB03Readback": {
-    "fepJournalHeadHash": "053ff2a4c79a6ca031bde5d2e5bf28d8966b1cdd59ca647b5e40965296d22c81",
-    "fepSourceReceiptHash": "053ff2a4c79a6ca031bde5d2e5bf28d8966b1cdd59ca647b5e40965296d22c81",
-    "fepAppendIndex": 1,
-    "fepSourceSequence": 1,
-    "fepReceiptDisposition": "APPENDED",
-    "fepReplayValid": true
+  "fepOwnedPostCommit": {
+    "receiptState": "DOMAIN_COMMITTED",
+    "receiptId": "fep-receipt-sha256:d738846f69c4705c95c66fd0cec511ecacdccdcbfe5095a7f2cb031b52f968cc",
+    "readbackFinality": "SOURCE_CONFIRMED",
+    "businessFinal": true,
+    "sourceReadbackRef": "fep-readback-sha256:c640faab21e30b33ff2f7a9731a7edbcede09b0bbe2de4ce52a8e8bbae09ae16",
+    "preCommandObjectVersion": "fep-balanced-journal-head/genesis",
+    "committedObjectVersion": "fep-balanced-journal-head/sha256:ee613e741ddc6d5e940d6641cccfbec7fd664f0a3a08d1d516ed0b835ad0e818",
+    "callerPremintedFinalityAccepted": false
   },
   "balance": {
-    "requestedMinor": 600,
-    "allocatedMinor": 600,
+    "requestedMinor": 700,
+    "allocatedMinor": 700,
     "balanced": true,
     "currency": "USD"
   },
@@ -55,7 +69,10 @@
   },
   "negativeCoverage": [
     "A02_EXACT_FIVE_PIN_DRIFT",
+    "A02_IMPLEMENTATION_FINAL_AND_MANIFEST_DIGEST_DRIFT",
+    "CALLER_PREMINTED_FINALITY_REJECTED",
     "TENANT_AND_SERVER_IDENTITY",
+    "TENANT_HEAD_AND_OBJECT_VERSION_CLOSURE",
     "B03_SCHEMA_AND_PRODUCER_DRIFT",
     "CONCURRENT_DUPLICATE_AND_IDEMPOTENCY_CONFLICT",
     "ORDERING_AND_TRANSACTION_HASH_REPLAY",
@@ -65,7 +82,7 @@
     "EFFECT_AUTHORITY_INJECTION",
     "INJECTED_FAILURE_EXACT_ROLLBACK"
   ],
-  "sourceBinding": "Git deployment metadata and b07-g0-proof-${GITHUB_SHA} artifact bind this public-safe vector to an exact commit.",
+  "sourceBinding": "Git deployment metadata and b07-g0-proof-${GITHUB_SHA} bind this public-safe vector to an exact commit.",
   "integrated": false,
   "productionReady": false
 }

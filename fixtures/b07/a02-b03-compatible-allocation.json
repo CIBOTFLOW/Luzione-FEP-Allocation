@@ -17,7 +17,7 @@
         "serverDerived": true,
         "request": {
           "requestId": "req-b07-synthetic-1",
-          "correlationId": "corr-b07-synthetic-1",
+          "correlationId": "corr-txn-a02-synthetic-1",
           "traceId": "11111111111111111111111111111111",
           "spanId": "2222222222222222",
           "requestedAt": "2026-09-03T03:28:00.000Z"
@@ -29,7 +29,7 @@
         },
         "logicalActor": null,
         "tenant": {
-          "tenantId": "tenant-acme",
+          "tenantId": "tenant-b03-synthetic",
           "source": "VERIFIED_CREDENTIAL",
           "boundary": "EXACT"
         },
@@ -40,84 +40,84 @@
         },
         "sourceVersionRefs": ["authority-subject/v0.1", "request-identity/v1"]
       },
-      "expectedObjectVersion": "new-simulation",
+      "expectedObjectVersion": "luzione-fep-allocation-simulation/genesis",
       "idempotencyKey": "idem-b07-synthetic-1",
       "payload": {
         "simulationMode": "SYNTHETIC_ONLY",
         "allocationSnapshot": {
-          "runAt": "2026-09-03T03:29:00.000Z",
+          "runAt": "2026-09-03T08:11:30.000Z",
           "request": {
             "requestId": "req-b07-synthetic-1",
-            "tenantId": "tenant-acme",
+            "tenantId": "tenant-b03-synthetic",
             "idempotencyKey": "idem-b07-synthetic-1",
-            "correlationId": "corr-b07-synthetic-1",
-            "requestedAmountMinor": 600,
+            "correlationId": "corr-txn-a02-synthetic-1",
+            "requestedAmountMinor": 700,
             "currency": "USD"
           },
           "funding": {
             "contractVersion": "fep-balanced-journal/v0.1-draft",
-            "producerSha": "526e513b0698c56fefbf5b5918bb025df73e8e9e",
-            "pinSha256": "939aa1c8337b2d18295c70a670b006cbc49137a46a46120fa27f420c00637fe6",
+            "producerSha": "5db6cc8772c40a7127b7514c57787299ddad57a5",
+            "pinSha256": "931dc8d0e78547eadfcc123675df86f63e024615083352c43961ebeaa28387b5",
             "schemaSha256": "5023cebce38e4bb43a7372aad85bc457c48d9adf62b8ab9ab3d02a26ac0a54c4",
             "migrationSha256": "e13ea51c501bcc56825af0e7583ec0929d9f3d816acb232b6e2e234b7a299c0f",
             "rollbackSha256": "3b926e7c8602207d551d05efd03ee308af695e34aa09eeb034735f77d3bff583",
             "journalTransaction": {
               "schemaVersion": "fep-balanced-journal/v0.1-draft",
-              "transactionId": "txn-b03-funding-synthetic-1",
+              "transactionId": "txn-a02-synthetic-1",
               "sourceCode": "LUZIONE_API_A02",
-              "sourceEventId": "evt-b03-funding-synthetic-1",
+              "sourceEventId": "evt-a02-domain-1",
               "sourceEventHash": "7777777777777777777777777777777777777777777777777777777777777777",
               "sourceSequence": 1,
-              "idempotencyKey": "idem-b03-funding-synthetic-1",
-              "correlationId": "corr-b07-synthetic-1",
-              "occurredAt": "2026-09-03T03:20:00.000Z",
-              "recordedAt": "2026-09-03T03:21:00.000Z",
+              "idempotencyKey": "idem-a02-synthetic-1",
+              "correlationId": "corr-txn-a02-synthetic-1",
+              "occurredAt": "2026-09-03T08:10:00.000Z",
+              "recordedAt": "2026-09-03T08:10:01.000Z",
               "lifecycleState": "SETTLED",
               "effectMode": "DISABLED",
               "expectedPreviousHash": null,
               "postings": [
                 {
-                  "entryId": "entry-b03-funding-debit-1",
-                  "accountId": "allocation-available",
+                  "entryId": "txn-a02-synthetic-1:cash",
+                  "accountId": "cash-clearing",
                   "direction": "DEBIT",
-                  "amountMinor": 600,
+                  "amountMinor": 700,
                   "currency": "USD"
                 },
                 {
-                  "entryId": "entry-b03-funding-credit-1",
-                  "accountId": "funding-clearing",
+                  "entryId": "txn-a02-synthetic-1:pool",
+                  "accountId": "fep-general-pool",
                   "direction": "CREDIT",
-                  "amountMinor": 600,
+                  "amountMinor": 700,
                   "currency": "USD"
                 }
               ]
             },
             "journalReceipt": {
               "disposition": "APPENDED",
-              "tenantId": "tenant-acme",
-              "transactionId": "txn-b03-funding-synthetic-1",
+              "tenantId": "tenant-b03-synthetic",
+              "transactionId": "txn-a02-synthetic-1",
               "appendIndex": 1,
               "previousTransactionHash": null,
-              "transactionHash": "053ff2a4c79a6ca031bde5d2e5bf28d8966b1cdd59ca647b5e40965296d22c81",
+              "transactionHash": "ee613e741ddc6d5e940d6641cccfbec7fd664f0a3a08d1d516ed0b835ad0e818",
               "effectMode": "NO_EFFECT"
             },
             "journalReadback": {
-              "tenantId": "tenant-acme",
+              "tenantId": "tenant-b03-synthetic",
               "valid": true,
               "transactionCount": 1,
-              "headHash": "053ff2a4c79a6ca031bde5d2e5bf28d8966b1cdd59ca647b5e40965296d22c81",
+              "headHash": "ee613e741ddc6d5e940d6641cccfbec7fd664f0a3a08d1d516ed0b835ad0e818",
               "balances": {
-                "allocation-available:USD": 600,
-                "funding-clearing:USD": -600
+                "cash-clearing:USD": 700,
+                "fep-general-pool:USD": -700
               },
               "effectMode": "NO_EFFECT"
             },
-            "journalHeadHash": "053ff2a4c79a6ca031bde5d2e5bf28d8966b1cdd59ca647b5e40965296d22c81",
-            "sourceReceiptHash": "053ff2a4c79a6ca031bde5d2e5bf28d8966b1cdd59ca647b5e40965296d22c81",
-            "availableBalanceKey": "allocation-available:USD",
-            "availableMinor": 600,
+            "journalHeadHash": "ee613e741ddc6d5e940d6641cccfbec7fd664f0a3a08d1d516ed0b835ad0e818",
+            "sourceReceiptHash": "ee613e741ddc6d5e940d6641cccfbec7fd664f0a3a08d1d516ed0b835ad0e818",
+            "availableBalanceKey": "cash-clearing:USD",
+            "availableMinor": 700,
             "currency": "USD",
-            "asOf": "2026-09-03T03:25:00.000Z"
+            "asOf": "2026-09-03T08:11:00.000Z"
           },
           "policy": {
             "contractVersion": "fep-policy-rules-v1",
@@ -125,7 +125,7 @@
             "policyHash": "5555555555555555555555555555555555555555555555555555555555555555",
             "eligiblePopulationHash": "6666666666666666666666666666666666666666666666666666666666666666",
             "minimumGroupSize": 2,
-            "validUntil": "2026-09-04T03:29:00.000Z"
+            "validUntil": "2026-09-04T08:11:30.000Z"
           },
           "candidates": [
             {
@@ -149,7 +149,7 @@
           ]
         }
       },
-      "payloadHash": "52cf0acda564cec8508d1d1752906a6fdd511009ae4b472a844527f383dc2db1",
+      "payloadHash": "e74e3ba569b5ead1e6c13f2faf3a9c0fa6f3c44d79eab4db584b26b34c756830",
       "policyVersionRefs": ["fep-policy-rules-v1"],
       "requestedAt": "2026-09-03T03:28:00.000Z",
       "requestedEffect": {
@@ -160,65 +160,15 @@
         "ownerProject": "CIBOTFLOW/Luzione-FEP-Allocation",
         "objectType": "fep-allocation-simulation",
         "objectId": "req-b07-synthetic-1",
-        "objectVersion": "luzione-fep-allocation-simulation/v0.1-draft"
+        "objectVersion": "luzione-fep-allocation-simulation/genesis"
       }
-    },
-    "receipt": {
-      "contractVersion": "luzione-receipt-envelope/v0.2-draft.1",
-      "receiptId": "receipt-b07-synthetic-1",
-      "commandId": "cmd-b07-synthetic-1",
-      "correlationId": "corr-b07-synthetic-1",
-      "tenantId": "tenant-acme",
-      "state": "DOMAIN_COMMITTED",
-      "effectAuthority": "NOT_GRANTED_BY_CONTRACT",
-      "idempotency": {
-        "key": "idem-b07-synthetic-1",
-        "payloadHash": "52cf0acda564cec8508d1d1752906a6fdd511009ae4b472a844527f383dc2db1",
-        "replay": false
-      },
-      "object": {
-        "ownerProject": "CIBOTFLOW/Luzione-FEP-Allocation",
-        "type": "fep-allocation-simulation",
-        "id": "req-b07-synthetic-1",
-        "version": "luzione-fep-allocation-simulation/v0.1-draft"
-      },
-      "evidence": {
-        "eventId": "evt-b07-domain-1",
-        "outboxMessageId": "outbox-b07-synthetic-1"
-      }
-    },
-    "readback": {
-      "contractVersion": "luzione-readback-envelope/v0.2-draft.1",
-      "tenantId": "tenant-acme",
-      "finality": "SOURCE_CONFIRMED",
-      "businessFinal": true,
-      "freshness": {
-        "state": "FRESH",
-        "observedAt": "2026-09-03T03:29:30.000Z",
-        "freshUntil": "2026-09-03T03:35:00.000Z"
-      },
-      "object": {
-        "ownerProject": "CIBOTFLOW/Luzione-FEP-Allocation",
-        "type": "fep-allocation-simulation",
-        "id": "req-b07-synthetic-1",
-        "version": "luzione-fep-allocation-simulation/v0.1-draft"
-      },
-      "evidence": {
-        "receiptId": "receipt-b07-synthetic-1",
-        "commandId": "cmd-b07-synthetic-1",
-        "eventId": "evt-b07-domain-1",
-        "providerAcknowledgementRef": null,
-        "reconciliationId": "recon-b07-synthetic-1",
-        "sourceReadbackRef": "source-readback-b07-synthetic-1"
-      },
-      "reason": "Synthetic source fixture confirms the bounded allocation simulation."
     }
   },
-  "now": "2026-09-03T03:30:00.000Z",
+  "now": "2026-09-03T08:12:00.000Z",
   "expected": {
-    "payloadHash": "52cf0acda564cec8508d1d1752906a6fdd511009ae4b472a844527f383dc2db1",
-    "innerSnapshotHash": "e3f42958b35015a32f3f75ba0899a41f967f09363486717db666b7df8717bdf2",
-    "allocationReceiptHash": "e9e65a7d1f4b28a9b68adce9c3dac4bdee6387613cdd43550138533f6fdce354",
-    "adapterReceiptHash": "11856c72203ecdd8e62b3ad992a1022914e84a3316179e4dc029d54ef79f0970"
+    "payloadHash": "e74e3ba569b5ead1e6c13f2faf3a9c0fa6f3c44d79eab4db584b26b34c756830",
+    "innerSnapshotHash": "df13645538803434c0ea93c291e902ac0f578fcc22c6ee07f6923da1b47815e1",
+    "allocationReceiptHash": "c426dab2b02a6bd181da3fe7b842e86c971757dab1e6749faa656f59bc3258de",
+    "adapterReceiptHash": "880e428c3036234e3613edbac39e2b6ad6cad9c740ca133ffc5e60d83e074480"
   }
 }

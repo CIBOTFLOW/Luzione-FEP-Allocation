@@ -1,0 +1,222 @@
+{
+  "ownerProject": "CIBOTFLOW/FEP-Platform",
+  "producerImplementationSha": "5db6cc8772c40a7127b7514c57787299ddad57a5",
+  "commandInput": {
+    "pinnedContractVersions": [
+      "luzione-shared-contracts/v0.2-draft.1",
+      "luzione-identity-tenant/v0.2-draft.1",
+      "luzione-command-envelope/v0.2-draft.1",
+      "luzione-receipt-envelope/v0.2-draft.1",
+      "luzione-readback-envelope/v0.2-draft.1"
+    ],
+    "command": {
+      "contractVersion": "luzione-command-envelope/v0.2-draft.1",
+      "activation": "DRAFT_ONLY",
+      "commandId": "cmd-txn-a02-synthetic-1",
+      "commandType": "fep.journal.simulate",
+      "context": {
+        "contractVersion": "luzione-identity-tenant/v0.2-draft.1",
+        "serverDerived": true,
+        "request": {
+          "requestId": "req-txn-a02-synthetic-1",
+          "correlationId": "corr-txn-a02-synthetic-1",
+          "traceId": "11111111111111111111111111111111",
+          "spanId": "2222222222222222",
+          "requestedAt": "2026-09-03T08:09:59.000Z"
+        },
+        "credentialActor": {
+          "actorId": "svc-luzione-api-a02-current",
+          "actorType": "service",
+          "credentialSource": "vercel-oidc"
+        },
+        "logicalActor": null,
+        "tenant": {
+          "tenantId": "tenant-b03-synthetic",
+          "source": "VERIFIED_CREDENTIAL",
+          "boundary": "EXACT"
+        },
+        "authority": {
+          "authorityClass": "INTERNAL_DRAFT",
+          "capability": "fep.journal.simulate",
+          "purpose": "synthetic-b03-compatibility"
+        },
+        "sourceVersionRefs": [
+          "authority-subject/v0.1",
+          "request-identity/v1"
+        ]
+      },
+      "expectedObjectVersion": "fep-balanced-journal-head/genesis",
+      "idempotencyKey": "idem-a02-synthetic-1",
+      "payload": {
+        "simulationMode": "SYNTHETIC_ONLY",
+        "journalDraft": {
+          "schemaVersion": "fep-balanced-journal/v0.1-draft",
+          "transactionId": "txn-a02-synthetic-1",
+          "sourceCode": "LUZIONE_API_A02",
+          "sourceEventId": "evt-a02-domain-1",
+          "sourceEventHash": "7777777777777777777777777777777777777777777777777777777777777777",
+          "sourceSequence": 1,
+          "idempotencyKey": "idem-a02-synthetic-1",
+          "correlationId": "corr-txn-a02-synthetic-1",
+          "occurredAt": "2026-09-03T08:10:00.000Z",
+          "recordedAt": "2026-09-03T08:10:01.000Z",
+          "lifecycleState": "SETTLED",
+          "effectMode": "DISABLED",
+          "expectedPreviousHash": null,
+          "postings": [
+            {
+              "entryId": "txn-a02-synthetic-1:cash",
+              "accountId": "cash-clearing",
+              "direction": "DEBIT",
+              "amountMinor": 700,
+              "currency": "USD"
+            },
+            {
+              "entryId": "txn-a02-synthetic-1:pool",
+              "accountId": "fep-general-pool",
+              "direction": "CREDIT",
+              "amountMinor": 700,
+              "currency": "USD"
+            }
+          ]
+        },
+        "objectVersionPrecondition": {
+          "expectedAppendIndex": 1,
+          "preCommandObjectVersion": "fep-balanced-journal-head/genesis"
+        }
+      },
+      "payloadHash": "43872db7c748ad2c56b298fb6a9d09c7a6786727fa36acea1581651a587f6cc0",
+      "policyVersionRefs": ["command-ledger/v0.1"],
+      "requestedAt": "2026-09-03T08:09:59.000Z",
+      "requestedEffect": {
+        "effectClass": "NO_EFFECT",
+        "authorizationRef": null
+      },
+      "target": {
+        "ownerProject": "CIBOTFLOW/FEP-Platform",
+        "objectType": "fep-balanced-journal",
+        "objectId": "fep-balanced-journal/tenant-sha256:38e11a3a1b345caeba07eb4e7b4ffb448122aa128908b75c26627d834223ab4a",
+        "objectVersion": "fep-balanced-journal-head/genesis"
+      }
+    }
+  },
+  "output": {
+    "producer": "CIBOTFLOW/Luzione-API@12685f46a60edea23aaa0a5403e300bf8858066b",
+    "producerFinalEvidenceSha": "bc43d5db8fe58230d6c3d35e32a73e1e8618b71e",
+    "contractVersions": [
+      "luzione-shared-contracts/v0.2-draft.1",
+      "luzione-identity-tenant/v0.2-draft.1",
+      "luzione-command-envelope/v0.2-draft.1",
+      "luzione-receipt-envelope/v0.2-draft.1",
+      "luzione-readback-envelope/v0.2-draft.1"
+    ],
+    "compatibilityInputHash": "9c543f2177665cf2753636df89c9325976ba500fac66780434f5be4946f65ad3",
+    "tenantId": "tenant-b03-synthetic",
+    "objectVersionTransition": {
+      "expectedAppendIndex": 1,
+      "preCommandObjectVersion": "fep-balanced-journal-head/genesis",
+      "committedObjectVersion": "fep-balanced-journal-head/sha256:ee613e741ddc6d5e940d6641cccfbec7fd664f0a3a08d1d516ed0b835ad0e818"
+    },
+    "receipt": {
+      "contractVersion": "luzione-receipt-envelope/v0.2-draft.1",
+      "receiptId": "fep-receipt-sha256:d738846f69c4705c95c66fd0cec511ecacdccdcbfe5095a7f2cb031b52f968cc",
+      "commandId": "cmd-txn-a02-synthetic-1",
+      "correlationId": "corr-txn-a02-synthetic-1",
+      "tenantId": "tenant-b03-synthetic",
+      "state": "DOMAIN_COMMITTED",
+      "effectAuthority": "NOT_GRANTED_BY_CONTRACT",
+      "idempotency": {
+        "key": "idem-a02-synthetic-1",
+        "payloadHash": "43872db7c748ad2c56b298fb6a9d09c7a6786727fa36acea1581651a587f6cc0",
+        "replay": false
+      },
+      "object": {
+        "ownerProject": "CIBOTFLOW/FEP-Platform",
+        "type": "fep-balanced-journal",
+        "id": "fep-balanced-journal/tenant-sha256:38e11a3a1b345caeba07eb4e7b4ffb448122aa128908b75c26627d834223ab4a",
+        "version": "fep-balanced-journal-head/sha256:ee613e741ddc6d5e940d6641cccfbec7fd664f0a3a08d1d516ed0b835ad0e818"
+      },
+      "evidence": {
+        "eventId": "evt-a02-domain-1",
+        "outboxMessageId": "fep-no-effect-outbox-sha256:858cb1cb840bcbd98bcb5458d0fb460f7fee9b49a40e6cd72ee7239fb2c1eacf"
+      }
+    },
+    "readback": {
+      "contractVersion": "luzione-readback-envelope/v0.2-draft.1",
+      "tenantId": "tenant-b03-synthetic",
+      "finality": "SOURCE_CONFIRMED",
+      "businessFinal": true,
+      "freshness": {
+        "state": "FRESH",
+        "observedAt": "2026-09-03T08:11:00.000Z",
+        "freshUntil": "2026-09-03T08:13:00.000Z"
+      },
+      "object": {
+        "ownerProject": "CIBOTFLOW/FEP-Platform",
+        "type": "fep-balanced-journal",
+        "id": "fep-balanced-journal/tenant-sha256:38e11a3a1b345caeba07eb4e7b4ffb448122aa128908b75c26627d834223ab4a",
+        "version": "fep-balanced-journal-head/sha256:ee613e741ddc6d5e940d6641cccfbec7fd664f0a3a08d1d516ed0b835ad0e818"
+      },
+      "evidence": {
+        "receiptId": "fep-receipt-sha256:d738846f69c4705c95c66fd0cec511ecacdccdcbfe5095a7f2cb031b52f968cc",
+        "commandId": "cmd-txn-a02-synthetic-1",
+        "eventId": "evt-a02-domain-1",
+        "providerAcknowledgementRef": null,
+        "reconciliationId": "fep-reconciliation-sha256:44e8ef6e6daf3526d7c8f4104f19785a35082b5fba729c469de91a2862c292c4",
+        "sourceReadbackRef": "fep-readback-sha256:c640faab21e30b33ff2f7a9731a7edbcede09b0bbe2de4ce52a8e8bbae09ae16"
+      },
+      "reason": "FEP-owned journal commit was confirmed by an exact tenant/head post-commit readback."
+    },
+    "journal": {
+      "contractVersion": "fep-balanced-journal/v0.1-draft",
+      "disposition": "APPENDED",
+      "requestHash": "016d421078e5e421c707460fe82ab0928a888101fa497d0c94d10083e91dd34f",
+      "transaction": {
+        "schemaVersion": "fep-balanced-journal/v0.1-draft",
+        "transactionId": "txn-a02-synthetic-1",
+        "sourceCode": "LUZIONE_API_A02",
+        "sourceEventId": "evt-a02-domain-1",
+        "sourceEventHash": "7777777777777777777777777777777777777777777777777777777777777777",
+        "sourceSequence": 1,
+        "idempotencyKey": "idem-a02-synthetic-1",
+        "correlationId": "corr-txn-a02-synthetic-1",
+        "occurredAt": "2026-09-03T08:10:00.000Z",
+        "recordedAt": "2026-09-03T08:10:01.000Z",
+        "lifecycleState": "SETTLED",
+        "effectMode": "DISABLED",
+        "expectedPreviousHash": null,
+        "postings": [
+          {
+            "entryId": "txn-a02-synthetic-1:cash",
+            "accountId": "cash-clearing",
+            "direction": "DEBIT",
+            "amountMinor": 700,
+            "currency": "USD"
+          },
+          {
+            "entryId": "txn-a02-synthetic-1:pool",
+            "accountId": "fep-general-pool",
+            "direction": "CREDIT",
+            "amountMinor": 700,
+            "currency": "USD"
+          }
+        ],
+        "appendIndex": 1,
+        "previousTransactionHash": null,
+        "transactionHash": "ee613e741ddc6d5e940d6641cccfbec7fd664f0a3a08d1d516ed0b835ad0e818"
+      },
+      "authority": {
+        "isolatedDraft": true,
+        "productionPost": false,
+        "moveMoney": false
+      }
+    },
+    "authority": {
+      "isolatedDraft": true,
+      "syntheticOnly": true,
+      "effectsEnabled": false,
+      "runtimeActivation": false,
+      "productionMigration": false
+    }
+  }
+}

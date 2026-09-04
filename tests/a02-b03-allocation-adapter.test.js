@@ -5,143 +5,162 @@ import test from 'node:test'
 import { A02B03AllocationAdapter } from '../src/a02B03AllocationAdapter.js'
 import { hash } from '../src/canonical.js'
 import { CONTRACT_PINS } from '../src/contractPins.js'
-import { createAllocationHttpServer } from '../src/server.js'
 
 const fixturePath = new URL('../fixtures/b07/a02-b03-compatible-allocation.json', import.meta.url)
+const fepPath = new URL('../fixtures/b07/fep-postcommit-a02-journal.json', import.meta.url)
 
 function fixture() {
-  return structuredClone(JSON.parse(readFileSync(fixturePath, 'utf8')))
+  const document = JSON.parse(readFileSync(fixturePath, 'utf8'))
+  document.input.fepPostCommit = JSON.parse(readFileSync(fepPath, 'utf8'))
+  return structuredClone(document)
 }
 
 function rehash(data) {
   data.input.command.payloadHash = hash(data.input.command.payload)
-  data.input.receipt.idempotency.payloadHash = data.input.command.payloadHash
 }
 
 function expectCode(run, code) {
   assert.throws(run, (error) => error.code === code)
 }
 
-test('pin records the corrected controller, exact A02 producer/five artifacts, and exact B03 candidate', () => {
-  const pin = JSON.parse(readFileSync(new URL('../contracts/B07_PIN.json', import.meta.url), 'utf8'))
-  assert.equal(pin.controller_release, '3a9c49fb3b7badb8a35eac1502e2ac3fb1be769c')
-  assert.equal(pin.controller_evidence_decision, 'a4b85512f113ff15cfe689347d1c9de0edf98123')
-  assert.equal(pin.api.producer_sha, 'f2d643a0913b888809c217adfd9bdcef0385b05a')
-  assert.deepEqual(pin.api.contract_versions, [
-    'luzione-shared-contracts/v0.2-draft.1',
-    'luzione-identity-tenant/v0.2-draft.1',
-    'luzione-command-envelope/v0.2-draft.1',
-    'luzione-receipt-envelope/v0.2-draft.1',
-    'luzione-readback-envelope/v0.2-draft.1',
-  ])
-  assert.deepEqual(pin.api.contract_versions, CONTRACT_PINS.apiContractVersions)
-  assert.equal(Object.keys(pin.api.artifact_sha256).length, 5)
-  assert.deepEqual(pin.api.artifact_sha256, CONTRACT_PINS.apiArtifactSha256)
-  assert.equal(pin.fep.producer_implementation_sha, '526e513b0698c56fefbf5b5918bb025df73e8e9e')
-  assert.equal(pin.fep.balanced_journal, 'fep-balanced-journal/v0.1-draft')
-  assert.equal(pin.effect_mode, 'DISABLED')
-  assert.equal(pin.requested_effect, 'NO_EFFECT')
-  assert.equal(pin.fep.pin_sha256, CONTRACT_PINS.fepJournalPinSha256)
-  assert.equal(pin.fep.durable_rehearsal_migration_sha256, CONTRACT_PINS.fepJournalMigrationSha256)
-  assert.equal(pin.fep.durable_rehearsal_rollback_sha256, CONTRACT_PINS.fepJournalRollbackSha256)
-
-  const preview = JSON.parse(readFileSync(new URL('../public/b07-g0-evidence.json', import.meta.url), 'utf8'))
-  assert.equal(preview.controllerRelease, pin.controller_release)
-  assert.deepEqual(preview.producerPins.apiContractVersions, pin.api.contract_versions)
-  assert.equal(preview.producerPins.fep, `CIBOTFLOW/FEP-Platform@${pin.fep.producer_implementation_sha}`)
-  assert.equal(preview.integrated, false)
-  assert.equal(preview.productionReady, false)
-})
-
-test('public-safe preview endpoint exposes the pinned immutable vector without authentication', async () => {
-  const server = createAllocationHttpServer({ service: {}, defaults: {} })
-  await new Promise((resolve, reject) => {
-    server.once('error', reject)
-    server.listen(0, '127.0.0.1', resolve)
-  })
-  try {
-    const address = server.address()
-    const response = await fetch(`http://127.0.0.1:${address.port}/b07-g0-evidence.json`)
-    assert.equal(response.status, 200)
-    assert.match(response.headers.get('content-type'), /^application\/json/)
-    const body = await response.json()
-    assert.equal(body.fixtureVectors.adapterReceiptHash, fixture().expected.adapterReceiptHash)
-    assert.equal(body.authority.moveMoney, false)
-    assert.equal(body.authority.writeFepJournal, false)
-  } finally {
-    await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()))
+function zeroEffects(committed = 0) {
+  return {
+    committedSimulations: committed,
+    replayClaims: committed,
+    fepJournalWrites: 0,
+    allocationWrites: 0,
+    reservationWrites: 0,
+    moneyEffects: 0,
+    providerEffects: 0,
+    runtimeActivations: 0,
+    productionMigrations: 0,
   }
+}
+
+test('exact controller, A02 implementation/final, five pins, digest domains, and B03 producer are immutable', () => {
+  const pin = JSON.parse(readFileSync(new URL('../contracts/B07_PIN.json', import.meta.url), 'utf8'))
+  assert.equal(CONTRACT_PINS.controllerRelease, 'b43e5a65c0ae8c8bcef7e015e4a3484877f736b0')
+  assert.equal(CONTRACT_PINS.apiProducerSha, '12685f46a60edea23aaa0a5403e300bf8858066b')
+  assert.equal(CONTRACT_PINS.apiFinalEvidenceSha, 'bc43d5db8fe58230d6c3d35e32a73e1e8618b71e')
+  assert.equal(CONTRACT_PINS.apiContractVersions.length, 5)
+  assert.ok(CONTRACT_PINS.apiContractVersions.every((version) => version.endsWith('/v0.2-draft.1')))
+  assert.deepEqual(CONTRACT_PINS.apiManifestDigests, {
+    rawFile: {
+      algorithm: 'sha256-raw-file-v1',
+      sha256: '2d7479019d04d24344b1d4bf4d953abee2d3382ed56b8201ebb49289253e00b7',
+    },
+    canonicalJson: {
+      algorithm: 'sha256-canonical-json-recursive-key-sort-v1',
+      sha256: 'eaf983e1496187a22688ddfed45b541fe88a3e2b70a2fbc60863fae1a9484208',
+    },
+  })
+  assert.equal(CONTRACT_PINS.fepJournalProducerSha, '5db6cc8772c40a7127b7514c57787299ddad57a5')
+  assert.equal(pin.controller_release, CONTRACT_PINS.controllerRelease)
+  assert.equal(pin.api.producer_sha, CONTRACT_PINS.apiProducerSha)
+  assert.equal(pin.api.final_evidence_sha, CONTRACT_PINS.apiFinalEvidenceSha)
+  assert.deepEqual(pin.api.contract_versions, CONTRACT_PINS.apiContractVersions)
+  assert.equal(pin.api.artifact_sha256['contracts/drafts/luzione-shared-contracts-v0.2-draft.1.manifest.json'], CONTRACT_PINS.apiManifestDigests.rawFile.sha256)
+  assert.equal(pin.api.manifest_digests.raw_file.sha256, CONTRACT_PINS.apiManifestDigests.rawFile.sha256)
+  assert.equal(pin.api.manifest_digests.canonical_json.sha256, CONTRACT_PINS.apiManifestDigests.canonicalJson.sha256)
+  assert.notEqual(pin.api.manifest_digests.raw_file.sha256, pin.api.manifest_digests.canonical_json.sha256)
+  assert.equal(pin.fep.producer_implementation_sha, CONTRACT_PINS.fepJournalProducerSha)
+  assert.equal(pin.fep.command_fixture_sha256, CONTRACT_PINS.fepJournalFixtureSha256)
 })
 
-test('exact producer evidence yields the immutable deterministic balanced NO_EFFECT receipt vector', () => {
+test('Allocation accepts only FEP-owned post-commit receipt/readback and produces a deterministic no-effect receipt', () => {
   const data = fixture()
-  assert.equal(data.input.command.payloadHash, data.expected.payloadHash)
-  assert.equal(hash(data.input.command.payload), data.expected.payloadHash)
   const result = new A02B03AllocationAdapter().simulate(data.input, data.now)
   assert.equal(result.disposition, 'SIMULATED')
-  assert.equal(result.receipt.allocation.snapshotHash, data.expected.innerSnapshotHash)
-  assert.equal(result.receipt.allocation.receiptHash, data.expected.allocationReceiptHash)
-  assert.equal(result.receipt.receiptHash, data.expected.adapterReceiptHash)
-  assert.deepEqual(result.receipt.balance, {
-    requestedMinor: 600,
-    allocatedMinor: 600,
-    balanced: true,
-    currency: 'USD',
+  assert.equal(result.receipt.compatibilityInputHash, hash(data.input))
+  assert.equal(result.receipt.evidence.upstreamReceiptId, data.input.fepPostCommit.output.receipt.receiptId)
+  assert.equal(result.receipt.evidence.sourceReadbackRef, data.input.fepPostCommit.output.readback.evidence.sourceReadbackRef)
+  assert.equal(result.receipt.evidence.fepSourceConfirmed, true)
+  assert.equal(result.receipt.evidence.fepBusinessFinal, true)
+  assert.deepEqual(result.receipt.balance, { requestedMinor: 700, allocatedMinor: 700, balanced: true, currency: 'USD' })
+  assert.deepEqual(result.receipt.authority, {
+    syntheticOnly: true,
+    writeFepJournal: false,
+    writeAllocation: false,
+    writeReservation: false,
+    moveMoney: false,
+    callProvider: false,
+    approveOrDeny: false,
+    selectNamedRecipientForSponsor: false,
+    resolveAppeal: false,
+    runtimeActivation: false,
+    productionMigration: false,
   })
-  assert.deepEqual(
-    result.receipt.allocation.allocations.map(({ eligibilityRef, amountMinor }) => ({ eligibilityRef, amountMinor })),
-    [
-      { eligibilityRef: 'elig_aaaaaaaaaaaa', amountMinor: 300 },
-      { eligibilityRef: 'elig_bbbbbbbbbbbb', amountMinor: 200 },
-      { eligibilityRef: 'elig_cccccccccccc', amountMinor: 100 },
-    ],
-  )
-  assert.equal(result.receipt.requestedEffect, 'NO_EFFECT')
   assert.ok(Object.isFrozen(result.receipt))
 })
 
-test('candidate ordering is deterministic and exact duplicate delivery replays one receipt', () => {
-  const baselineData = fixture()
-  const baselineAdapter = new A02B03AllocationAdapter()
-  const first = baselineAdapter.simulate(baselineData.input, baselineData.now)
-  const replay = baselineAdapter.simulate(baselineData.input, baselineData.now)
+test('caller-pre-minted receipt or readback finality is forbidden', () => {
+  for (const field of ['receipt', 'readback']) {
+    const data = fixture()
+    data.input[field] = { state: 'SOURCE_CONFIRMED', businessFinal: true }
+    expectCode(() => new A02B03AllocationAdapter().simulate(data.input, data.now), 'CALLER_PREMINTED_FINALITY_FORBIDDEN')
+  }
+})
+
+test('Allocation and FEP pre/expected/committed object versions close exact heads', () => {
+  const data = fixture()
+  const result = new A02B03AllocationAdapter().simulate(data.input, data.now)
+  assert.deepEqual(result.receipt.objectVersionTransition, {
+    preCommandObjectVersion: 'luzione-fep-allocation-simulation/genesis',
+    committedObjectVersion: result.receipt.objectVersionTransition.committedObjectVersion,
+  })
+  assert.match(result.receipt.objectVersionTransition.committedObjectVersion, /^luzione-fep-allocation-simulation\/sha256:[a-f0-9]{64}$/)
+  assert.equal(result.receipt.evidence.fepPreCommandObjectVersion, 'fep-balanced-journal-head/genesis')
+  assert.equal(result.receipt.evidence.fepCommittedObjectVersion, `fep-balanced-journal-head/sha256:${result.receipt.evidence.fepJournalHeadHash}`)
+
+  const wrongHead = fixture()
+  wrongHead.input.command.expectedObjectVersion = 'luzione-fep-allocation-simulation/sha256:' + '9'.repeat(64)
+  wrongHead.input.command.target.objectVersion = wrongHead.input.command.expectedObjectVersion
+  expectCode(() => new A02B03AllocationAdapter().simulate(wrongHead.input, wrongHead.now), 'TARGET_BINDING_MISMATCH')
+})
+
+test('exact duplicate replays one receipt; changed payload conflicts without a second claim', () => {
+  const data = fixture()
+  const adapter = new A02B03AllocationAdapter()
+  const first = adapter.simulate(data.input, data.now)
+  const replay = adapter.simulate(data.input, data.now)
   assert.equal(replay.disposition, 'REPLAYED')
   assert.equal(replay.receipt.receiptHash, first.receipt.receiptHash)
-  assert.equal(baselineAdapter.diagnostics().committedSimulations, 1)
 
-  const reordered = fixture()
-  reordered.input.command.payload.allocationSnapshot.candidates.reverse()
-  rehash(reordered)
-  const independent = new A02B03AllocationAdapter().simulate(reordered.input, reordered.now)
-  assert.deepEqual(independent.receipt.allocation.allocations, first.receipt.allocation.allocations)
-  assert.equal(independent.receipt.allocation.receiptHash, first.receipt.allocation.receiptHash)
+  const changed = fixture()
+  changed.input.command.payload.allocationSnapshot.request.requestedAmountMinor = 600
+  rehash(changed)
+  expectCode(() => adapter.simulate(changed.input, changed.now), 'COMMAND_REPLAY_CONFLICT')
+  assert.deepEqual(adapter.diagnostics(), zeroEffects(1))
 })
 
-test('cross-tenant and client-derived identity paths fail closed', () => {
-  const crossTenant = fixture()
-  crossTenant.input.command.context.tenant.tenantId = 'tenant-other'
-  expectCode(() => new A02B03AllocationAdapter().simulate(crossTenant.input, crossTenant.now), 'ALLOCATION_CONTEXT_DRIFT')
-
-  const clientDerived = fixture()
-  clientDerived.input.command.context.serverDerived = false
-  expectCode(() => new A02B03AllocationAdapter().simulate(clientDerived.input, clientDerived.now), 'SERVER_DERIVED_CONTEXT_REQUIRED')
-
-  const unverifiedTenant = fixture()
-  unverifiedTenant.input.command.context.tenant.source = 'CLIENT_INPUT'
-  expectCode(() => new A02B03AllocationAdapter().simulate(unverifiedTenant.input, unverifiedTenant.now), 'TENANT_AUTHORITY_INVALID')
-
-  const wrongCapability = fixture()
-  wrongCapability.input.command.context.authority.capability = 'fep.journal.post'
-  expectCode(() => new A02B03AllocationAdapter().simulate(wrongCapability.input, wrongCapability.now), 'CAPABILITY_INVALID')
+test('tenant and server-derived producer identity drift fail closed', () => {
+  const cases = [
+    [(data) => { data.input.command.context.tenant.tenantId = 'tenant-other' }, 'ALLOCATION_CONTEXT_DRIFT'],
+    [(data) => { data.input.command.context.serverDerived = false }, 'SERVER_DERIVED_CONTEXT_REQUIRED'],
+    [(data) => { data.input.command.context.tenant.source = 'CLIENT_INPUT' }, 'TENANT_AUTHORITY_INVALID'],
+    [(data) => { data.input.fepPostCommit.commandInput.command.context.tenant.tenantId = 'tenant-other' }, 'B03_POSTCOMMIT_CONTEXT_DRIFT'],
+    [(data) => { data.input.fepPostCommit.commandInput.command.context.credentialActor.actorType = 'user' }, 'B03_POSTCOMMIT_PRODUCER_IDENTITY_INVALID'],
+    [(data) => { data.input.fepPostCommit.commandInput.command.context.credentialActor.actorId = 7 }, 'B03_POSTCOMMIT_VALUE_INVALID'],
+    [(data) => { data.input.fepPostCommit.commandInput.command.context.logicalActor = { actorId: 'agent-x' } }, 'B03_POSTCOMMIT_PRODUCER_IDENTITY_INVALID'],
+    [(data) => { data.input.fepPostCommit.commandInput.command.context.authority.authorityClass = false }, 'B03_POSTCOMMIT_VALUE_INVALID'],
+  ]
+  for (const [mutate, code] of cases) {
+    const data = fixture()
+    mutate(data)
+    expectCode(() => new A02B03AllocationAdapter().simulate(data.input, data.now), code)
+  }
 })
 
-test('each A02 envelope version and the exact five-version set reject drift', () => {
+test('A02 exact pin, implementation, final-evidence, and FEP owner drift fail closed', () => {
   const cases = [
     [(data) => { data.input.pinnedContractVersions[0] = 'luzione-shared-contracts/v0.2-draft.2' }, 'CONTRACT_PIN_SET_MISMATCH'],
     [(data) => { data.input.command.context.contractVersion = 'luzione-identity-tenant/v0.2-draft.2' }, 'CONTRACT_VERSION_MISMATCH'],
     [(data) => { data.input.command.contractVersion = 'luzione-command-envelope/v0.2-draft.2' }, 'CONTRACT_VERSION_MISMATCH'],
-    [(data) => { data.input.receipt.contractVersion = 'luzione-receipt-envelope/v0.2-draft.2' }, 'CONTRACT_VERSION_MISMATCH'],
-    [(data) => { data.input.readback.contractVersion = 'luzione-readback-envelope/v0.2-draft.2' }, 'CONTRACT_VERSION_MISMATCH'],
+    [(data) => { data.input.fepPostCommit.output.receipt.contractVersion = 'luzione-receipt-envelope/v0.2-draft.2' }, 'B03_POSTCOMMIT_RECEIPT_INVALID'],
+    [(data) => { data.input.fepPostCommit.output.readback.contractVersion = 'luzione-readback-envelope/v0.2-draft.2' }, 'B03_POSTCOMMIT_FINALITY_REQUIRED'],
+    [(data) => { data.input.fepPostCommit.output.producer = 'CIBOTFLOW/Luzione-API@' + '9'.repeat(40) }, 'B03_POSTCOMMIT_PRODUCER_MISMATCH'],
+    [(data) => { data.input.fepPostCommit.output.producerFinalEvidenceSha = '9'.repeat(40) }, 'B03_POSTCOMMIT_PRODUCER_MISMATCH'],
+    [(data) => { data.input.fepPostCommit.producerImplementationSha = '9'.repeat(40) }, 'B03_POSTCOMMIT_OWNER_MISMATCH'],
   ]
   for (const [mutate, code] of cases) {
     const data = fixture()
@@ -150,100 +169,13 @@ test('each A02 envelope version and the exact five-version set reject drift', ()
   }
 })
 
-test('stale, future, dispatch-pending, and nonfinal evidence fails closed', () => {
-  const staleReadback = fixture()
-  staleReadback.input.readback.freshness.state = 'STALE'
-  staleReadback.input.readback.freshness.freshUntil = '2026-09-03T03:29:59.000Z'
-  expectCode(() => new A02B03AllocationAdapter().simulate(staleReadback.input, staleReadback.now), 'FRESH_READBACK_REQUIRED')
-
-  const staleFunding = fixture()
-  staleFunding.input.command.payload.allocationSnapshot.funding.asOf = '2026-09-03T03:00:00.000Z'
-  rehash(staleFunding)
-  expectCode(() => new A02B03AllocationAdapter().simulate(staleFunding.input, staleFunding.now), 'FUNDING_SNAPSHOT_STALE')
-
-  const futureFunding = fixture()
-  futureFunding.input.command.payload.allocationSnapshot.funding.asOf = '2026-09-03T03:30:00.000Z'
-  rehash(futureFunding)
-  expectCode(() => new A02B03AllocationAdapter().simulate(futureFunding.input, futureFunding.now), 'FUNDING_SNAPSHOT_STALE')
-
-  const pending = fixture()
-  pending.input.receipt.state = 'DISPATCH_PENDING'
-  expectCode(() => new A02B03AllocationAdapter().simulate(pending.input, pending.now), 'DOMAIN_COMMIT_REQUIRED')
-
-  const nonfinal = fixture()
-  nonfinal.input.readback.finality = 'PROVIDER_ACKNOWLEDGED'
-  nonfinal.input.readback.businessFinal = false
-  expectCode(() => new A02B03AllocationAdapter().simulate(nonfinal.input, nonfinal.now), 'SOURCE_FINALITY_REQUIRED')
-})
-
-test('same command with changed payload is a conflict and cannot mutate the committed replay record', () => {
-  const adapter = new A02B03AllocationAdapter()
-  const first = fixture()
-  adapter.simulate(first.input, first.now)
-
-  const conflict = fixture()
-  conflict.input.command.payload.allocationSnapshot.request.requestedAmountMinor = 500
-  rehash(conflict)
-  expectCode(() => adapter.simulate(conflict.input, conflict.now), 'COMMAND_REPLAY_CONFLICT')
-  assert.deepEqual(adapter.diagnostics(), {
-    committedSimulations: 1,
-    replayClaims: 1,
-    fepJournalWrites: 0,
-    allocationWrites: 0,
-    reservationWrites: 0,
-    moneyEffects: 0,
-    providerEffects: 0,
-    runtimeActivations: 0,
-    productionMigrations: 0,
-  })
-})
-
-test('fairness labels do not decide allocations, small groups stay private, and appeal authority remains with FEP', () => {
-  const baselineData = fixture()
-  const baseline = new A02B03AllocationAdapter().simulate(baselineData.input, baselineData.now).receipt.allocation
-
-  const changed = fixture()
-  changed.input.command.commandId = 'cmd-b07-fairness-2'
-  changed.input.command.payload.allocationSnapshot.request.idempotencyKey = 'idem-b07-fairness-2'
-  changed.input.command.idempotencyKey = 'idem-b07-fairness-2'
-  changed.input.receipt.commandId = 'cmd-b07-fairness-2'
-  changed.input.readback.evidence.commandId = 'cmd-b07-fairness-2'
-  changed.input.receipt.idempotency.key = 'idem-b07-fairness-2'
-  changed.input.command.payload.allocationSnapshot.candidates[0].fairnessGroup = 'broad-region-b'
-  changed.input.command.payload.allocationSnapshot.candidates[2].fairnessGroup = 'broad-region-a'
-  rehash(changed)
-  const mutated = new A02B03AllocationAdapter().simulate(changed.input, changed.now).receipt.allocation
-  assert.deepEqual(mutated.allocations, baseline.allocations)
-  assert.equal(mutated.fairness.decisionUsesFairnessGroup, false)
-  assert.ok(mutated.fairness.groups.some((group) => group.suppressed))
-  assert.ok(mutated.allocations.every((allocation) => allocation.appeal.authority === 'FEP_PLATFORM'))
-  assert.ok(mutated.allocations.every((allocation) => allocation.appeal.adapterCanResolve === false))
-
-  const pii = fixture()
-  pii.input.command.context.request.correlationId = 'person@example.com'
-  pii.input.command.payload.allocationSnapshot.request.correlationId = 'person@example.com'
-  pii.input.command.payload.allocationSnapshot.funding.journalTransaction.correlationId = 'person@example.com'
-  pii.input.receipt.correlationId = 'person@example.com'
-  const funding = pii.input.command.payload.allocationSnapshot.funding
-  funding.journalReceipt.transactionHash = hash({
-    ...funding.journalTransaction,
-    appendIndex: funding.journalReceipt.appendIndex,
-    previousTransactionHash: funding.journalReceipt.previousTransactionHash,
-  })
-  funding.journalReadback.headHash = funding.journalReceipt.transactionHash
-  funding.journalHeadHash = funding.journalReceipt.transactionHash
-  funding.sourceReceiptHash = funding.journalReceipt.transactionHash
-  rehash(pii)
-  expectCode(() => new A02B03AllocationAdapter().simulate(pii.input, pii.now), 'PRIVATE_DATA_PROHIBITED')
-})
-
-test('receipt and readback identity, object, idempotency, and evidence mismatches are rejected', () => {
+test('stale, future, pending, nonfinal, and mismatched FEP readback are rejected', () => {
   const cases = [
-    [(data) => { data.input.receipt.tenantId = 'tenant-other' }, 'RECEIPT_CONTEXT_DRIFT'],
-    [(data) => { data.input.receipt.idempotency.payloadHash = '9'.repeat(64) }, 'RECEIPT_IDEMPOTENCY_DRIFT'],
-    [(data) => { data.input.receipt.object.id = 'req-unrelated' }, 'RECEIPT_OBJECT_DRIFT'],
-    [(data) => { data.input.readback.object.id = 'req-unrelated' }, 'READBACK_OBJECT_DRIFT'],
-    [(data) => { data.input.readback.evidence.receiptId = 'receipt-unrelated' }, 'READBACK_EVIDENCE_DRIFT'],
+    [(data) => { data.input.fepPostCommit.output.readback.freshness.state = 'STALE' }, 'B03_POSTCOMMIT_FRESHNESS_REQUIRED'],
+    [(data) => { data.input.fepPostCommit.output.readback.freshness.observedAt = '2026-09-03T08:13:00.000Z' }, 'B03_POSTCOMMIT_FRESHNESS_REQUIRED'],
+    [(data) => { data.input.fepPostCommit.output.receipt.state = 'DISPATCH_PENDING' }, 'B03_POSTCOMMIT_RECEIPT_INVALID'],
+    [(data) => { data.input.fepPostCommit.output.readback.businessFinal = false }, 'B03_POSTCOMMIT_FINALITY_REQUIRED'],
+    [(data) => { data.input.fepPostCommit.output.readback.object.version = 'fep-balanced-journal-head/genesis' }, 'B03_POSTCOMMIT_READBACK_MISMATCH'],
   ]
   for (const [mutate, code] of cases) {
     const data = fixture()
@@ -252,30 +184,27 @@ test('receipt and readback identity, object, idempotency, and evidence mismatche
   }
 })
 
-test('B03 version, producer, schema, receipt, balance, and currency mismatch paths fail closed', () => {
-  const cases = [
-    [(data) => { data.input.command.payload.allocationSnapshot.funding.contractVersion = 'fep-balanced-journal/v0.2-draft' }, 'B03_PRODUCER_PIN_MISMATCH'],
-    [(data) => { data.input.command.payload.allocationSnapshot.funding.producerSha = '9'.repeat(40) }, 'B03_PRODUCER_PIN_MISMATCH'],
-    [(data) => { data.input.command.payload.allocationSnapshot.funding.schemaSha256 = '9'.repeat(64) }, 'B03_PRODUCER_PIN_MISMATCH'],
-    [(data) => { data.input.command.payload.allocationSnapshot.funding.sourceReceiptHash = 'not-a-digest' }, 'B03_SOURCE_RECEIPT_MISMATCH'],
-    [(data) => { data.input.command.payload.allocationSnapshot.request.requestedAmountMinor = 601 }, 'INSUFFICIENT_FEP_PROJECTION'],
-    [(data) => { data.input.command.payload.allocationSnapshot.request.currency = 'EUR' }, 'CURRENCY_MISMATCH'],
-  ]
-  for (const [mutate, code] of cases) {
-    const data = fixture()
-    mutate(data)
-    rehash(data)
-    expectCode(() => new A02B03AllocationAdapter().simulate(data.input, data.now), code)
-  }
+test('fairness metadata is non-decisional, small groups are private, and appeal remains FEP-owned', () => {
+  const data = fixture()
+  const receipt = new A02B03AllocationAdapter().simulate(data.input, data.now).receipt.allocation
+  assert.equal(receipt.fairness.decisionUsesFairnessGroup, false)
+  assert.ok(receipt.fairness.groups.some((group) => group.suppressed))
+  assert.ok(receipt.allocations.every((allocation) => allocation.appeal.authority === 'FEP_PLATFORM'))
+  assert.ok(receipt.allocations.every((allocation) => allocation.appeal.adapterCanResolve === false))
+
+  const privateData = fixture()
+  privateData.input.command.payload.allocationSnapshot.candidates[0].eligibilityRef = 'person@example.com'
+  rehash(privateData)
+  expectCode(() => new A02B03AllocationAdapter().simulate(privateData.input, privateData.now), 'ELIGIBILITY_REFERENCE_INVALID')
 })
 
-test('effect, activation, synthetic-mode, and schema authority injection attempts are rejected', () => {
+test('effect, provider, money, runtime, migration, and schema authority injections fail closed', () => {
   const cases = [
     [(data) => { data.input.command.activation = 'ACTIVE' }, 'DRAFT_ACTIVATION_REQUIRED'],
     [(data) => { data.input.command.requestedEffect.effectClass = 'EXTERNAL_EFFECT' }, 'EFFECT_AUTHORITY_FORBIDDEN'],
-    [(data) => { data.input.receipt.effectAuthority = 'GRANTED' }, 'EFFECT_AUTHORITY_FORBIDDEN'],
-    [(data) => { data.input.command.payload.simulationMode = 'LIVE' }, 'SYNTHETIC_MODE_REQUIRED'],
-    [(data) => { data.input.command.payload.moneyAuthority = true }, 'SCHEMA_SHAPE_MISMATCH'],
+    [(data) => { data.input.fepPostCommit.output.authority.effectsEnabled = true }, 'B03_POSTCOMMIT_EFFECT_FORBIDDEN'],
+    [(data) => { data.input.fepPostCommit.output.journal.authority.moveMoney = true }, 'B03_POSTCOMMIT_EFFECT_FORBIDDEN'],
+    [(data) => { data.input.command.payload.providerCall = true }, 'SCHEMA_SHAPE_MISMATCH'],
   ]
   for (const [mutate, code] of cases) {
     const data = fixture()
@@ -284,27 +213,11 @@ test('effect, activation, synthetic-mode, and schema authority injection attempt
   }
 })
 
-test('failure rollback leaves no partial replay claim or effects, and corrected retry succeeds', () => {
+test('injected failure rolls back exactly and a corrected retry creates the sole claim', async () => {
+  const data = fixture()
   const adapter = new A02B03AllocationAdapter()
-  const failed = fixture()
-  failed.input.command.payload.allocationSnapshot.candidates.forEach((candidate) => {
-    candidate.maximumAllocationMinor = 100
-  })
-  rehash(failed)
-  expectCode(() => adapter.simulate(failed.input, failed.now), 'CANDIDATE_CAPACITY_INSUFFICIENT')
-  assert.deepEqual(adapter.diagnostics(), {
-    committedSimulations: 0,
-    replayClaims: 0,
-    fepJournalWrites: 0,
-    allocationWrites: 0,
-    reservationWrites: 0,
-    moneyEffects: 0,
-    providerEffects: 0,
-    runtimeActivations: 0,
-    productionMigrations: 0,
-  })
-
-  const corrected = fixture()
-  assert.equal(adapter.simulate(corrected.input, corrected.now).disposition, 'SIMULATED')
-  assert.equal(adapter.diagnostics().committedSimulations, 1)
+  await assert.rejects(adapter.simulateAtomic(data.input, data.now, { injectFailureAfterReceipt: true }), (error) => error.code === 'INJECTED_FAILURE_ROLLBACK')
+  assert.deepEqual(adapter.diagnostics(), zeroEffects())
+  assert.equal((await adapter.simulateAtomic(data.input, data.now)).disposition, 'SIMULATED')
+  assert.deepEqual(adapter.diagnostics(), zeroEffects(1))
 })

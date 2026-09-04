@@ -1,6 +1,6 @@
 {
   "snapshot": {
-    "schemaVersion": "luzione-fep-allocation-simulation/v0.1-draft",
+    "schemaVersion": "luzione-fep-allocation-simulation/v0.2-draft",
     "effectMode": "DISABLED",
     "runAt": "2026-09-02T20:00:00.000Z",
     "identity": {
@@ -22,7 +22,7 @@
     },
     "funding": {
       "contractVersion": "fep-balanced-journal/v0.1-draft",
-      "producerSha": "526e513b0698c56fefbf5b5918bb025df73e8e9e",
+      "producerSha": "5db6cc8772c40a7127b7514c57787299ddad57a5",
       "schemaSha256": "5023cebce38e4bb43a7372aad85bc457c48d9adf62b8ab9ab3d02a26ac0a54c4",
       "journalHeadHash": "2222222222222222222222222222222222222222222222222222222222222222",
       "sourceReceiptHash": "3333333333333333333333333333333333333333333333333333333333333333",
@@ -59,6 +59,6 @@
       }
     ]
   },
-  "snapshotHash": "35422992baa10531cccb6a31dedaf017d0e010f9a5d9b2c0f826f141a6269853",
-  "expectedReceiptHash": "26e2220c8c97260fb3db44d98fc659a636d8cd79f9083ea0863ac5a0a09aab82"
+  "snapshotHash": "0caeab677db2424e590aa3aca0176d583e954daa8c3b99347e69e4eaf0aec7d8",
+  "expectedReceiptHash": "a57df811cac4a0688e7359fcb5a152b09dc2d538152085e975eeb8b977f105bc"
 }

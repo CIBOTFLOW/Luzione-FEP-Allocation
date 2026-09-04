@@ -4,6 +4,7 @@ import { A02B03AllocationAdapter } from '../src/a02B03AllocationAdapter.js'
 import { CONTRACT_PINS } from '../src/contractPins.js'
 
 const fixture = JSON.parse(readFileSync(new URL('../fixtures/b07/a02-b03-compatible-allocation.json', import.meta.url), 'utf8'))
+fixture.input.fepPostCommit = JSON.parse(readFileSync(new URL('../fixtures/b07/fep-postcommit-a02-journal.json', import.meta.url), 'utf8'))
 const adapter = new A02B03AllocationAdapter()
 const result = await adapter.simulateAtomic(fixture.input, fixture.now)
 const replay = await adapter.simulateAtomic(fixture.input, fixture.now)
@@ -16,14 +17,15 @@ try {
 }
 
 const proof = {
-  schemaVersion: 'luzione-fep-allocation-b07-proof/v0.1-draft',
+  schemaVersion: 'luzione-fep-allocation-b07-proof/v0.2-draft',
   gate: 'G0',
   status: 'ISOLATED_SYNTHETIC_NO_EFFECT',
   sourceSha: process.env.GITHUB_SHA ?? 'LOCAL_UNBOUND',
   controllerRelease: CONTRACT_PINS.controllerRelease,
-  controllerEvidenceDecision: CONTRACT_PINS.controllerEvidenceDecision,
+  controllerEvidence: CONTRACT_PINS.controllerEvidence,
   producerPins: result.receipt.producerPins,
-  artifactSha256: CONTRACT_PINS.apiArtifactSha256,
+  apiArtifactSha256: CONTRACT_PINS.apiArtifactSha256,
+  apiManifestDigests: CONTRACT_PINS.apiManifestDigests,
   fixtureVectors: fixture.expected,
   observed: {
     adapterReceiptHash: result.receipt.receiptHash,
@@ -31,9 +33,10 @@ const proof = {
     innerSnapshotHash: result.receipt.allocation.snapshotHash,
     allocations: result.receipt.allocation.allocations.map(({ eligibilityRef, amountMinor, currency }) => ({ eligibilityRef, amountMinor, currency })),
     balance: result.receipt.balance,
+    objectVersionTransition: result.receipt.objectVersionTransition,
   },
   authority: result.receipt.authority,
-  durableB03Readback: result.receipt.evidence,
+  fepOwnedPostCommitReceiptReadback: result.receipt.evidence,
   concurrencyReplay: {
     firstDisposition: result.disposition,
     duplicateDisposition: replay.disposition,
@@ -47,7 +50,10 @@ const proof = {
   },
   automatedNegativeCoverage: [
     'A02_EXACT_FIVE_PIN_DRIFT',
+    'A02_IMPLEMENTATION_FINAL_AND_MANIFEST_DIGEST_DRIFT',
+    'CALLER_PREMINTED_FINALITY_REJECTED',
     'TENANT_AND_SERVER_IDENTITY',
+    'TENANT_HEAD_AND_OBJECT_VERSION_CLOSURE',
     'B03_SCHEMA_AND_PRODUCER_DRIFT',
     'CONCURRENT_DUPLICATE_AND_IDEMPOTENCY_CONFLICT',
     'ORDERING_AND_TRANSACTION_HASH_REPLAY',
