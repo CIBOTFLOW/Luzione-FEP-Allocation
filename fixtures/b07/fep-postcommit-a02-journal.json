@@ -1,6 +1,6 @@
 {
   "ownerProject": "CIBOTFLOW/FEP-Platform",
-  "producerImplementationSha": "5db6cc8772c40a7127b7514c57787299ddad57a5",
+  "producerImplementationSha": "7a50cfa9a9ec599241e936a64a58529868ca81eb",
   "commandInput": {
     "pinnedContractVersions": [
       "luzione-shared-contracts/v0.2-draft.1",

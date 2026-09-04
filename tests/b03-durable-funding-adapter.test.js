@@ -50,6 +50,9 @@ test('FEP-owned post-commit evidence closes exact receipt, readback, head, and p
   assert.equal(result.receipt.producerPins.fepJournalFixtureSha256, CONTRACT_PINS.fepJournalFixtureSha256)
   assert.deepEqual(result.receipt.evidence, {
     commandId: 'cmd-b07-synthetic-1',
+    identityTenantBindingHash: '10792cf5bae75494f09fb0eddcee7534e76bd0f16b46a8498c3f9abb371e2492',
+    upstreamIdentityTenantBindingHash: '79f47bf6e8697eee477e40d59783f39ffb8e9a14957891a101a786041b4ea6ff',
+    callerTenantAccepted: false,
     upstreamReceiptId: 'fep-receipt-sha256:d738846f69c4705c95c66fd0cec511ecacdccdcbfe5095a7f2cb031b52f968cc',
     sourceReadbackRef: 'fep-readback-sha256:c640faab21e30b33ff2f7a9731a7edbcede09b0bbe2de4ce52a8e8bbae09ae16',
     fepJournalHeadHash: 'ee613e741ddc6d5e940d6641cccfbec7fd664f0a3a08d1d516ed0b835ad0e818',

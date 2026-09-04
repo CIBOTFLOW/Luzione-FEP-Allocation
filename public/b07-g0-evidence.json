@@ -2,8 +2,8 @@
   "schemaVersion": "luzione-fep-allocation-b07-preview/v0.2-draft",
   "gate": "G0",
   "status": "ISOLATED_SYNTHETIC_NO_EFFECT",
-  "controllerRelease": "b43e5a65c0ae8c8bcef7e015e4a3484877f736b0",
-  "controllerEvidence": "evidence/SYNC_REVIEW_20260903T234455Z.md",
+  "controllerRelease": "1ecf8ead139d4ecd1efc1840c7be6c1bd982d865",
+  "controllerAuthorization": "issue-14-comment-5535226733",
   "producerPins": {
     "api": "CIBOTFLOW/Luzione-API@12685f46a60edea23aaa0a5403e300bf8858066b",
     "apiFinalEvidenceSha": "bc43d5db8fe58230d6c3d35e32a73e1e8618b71e",
@@ -24,19 +24,41 @@
         "sha256": "eaf983e1496187a22688ddfed45b541fe88a3e2b70a2fbc60863fae1a9484208"
       }
     },
-    "fep": "CIBOTFLOW/FEP-Platform@5db6cc8772c40a7127b7514c57787299ddad57a5",
+    "fep": "CIBOTFLOW/FEP-Platform@7a50cfa9a9ec599241e936a64a58529868ca81eb",
     "fepJournalContract": "fep-balanced-journal/v0.1-draft",
-    "fepPinSha256": "931dc8d0e78547eadfcc123675df86f63e024615083352c43961ebeaa28387b5",
+    "fepPinSha256": "f1b25c65a52682117b372b37c604d9966e2eb691649000f235504a37f14ccf23",
     "fepSchemaSha256": "5023cebce38e4bb43a7372aad85bc457c48d9adf62b8ab9ab3d02a26ac0a54c4",
-    "fepFixtureSha256": "57f17445caaa13efe9aeb9a3316bae83adade99d800d81159bdb78556cddd016",
+    "fepJournalFixtureSha256": "57f17445caaa13efe9aeb9a3316bae83adade99d800d81159bdb78556cddd016",
     "fepMigrationSha256": "e13ea51c501bcc56825af0e7583ec0929d9f3d816acb232b6e2e234b7a299c0f",
-    "fepRollbackSha256": "3b926e7c8602207d551d05efd03ee308af695e34aa09eeb034735f77d3bff583"
+    "fepRollbackSha256": "3b926e7c8602207d551d05efd03ee308af695e34aa09eeb034735f77d3bff583",
+    "fepIdentityTenantFixtureSha256": "0d6a5dc72d93d79c6429ac38c28183c42020e6cccca3e2e144d88c78e0d4b8cb",
+    "localIdentityTenantFixtureSha256": "8e81394c8a6df170a86601f47005dda89e519b63c16912b0d25fd43324057438",
+    "fepPr41HeadSha": "594c3d3584ffed29ac776486b28255cf178f4bd2",
+    "fepPr41RehearsalSha256": "b140915dddccac8966446e22ac7d8920b3c0e4a8c0cb0e3231b8f7577a0e714e",
+    "fepPr41RollbackSha256": "7bf8fff096236b029c7ba5d0c128d9660559a68eeb842acffad961624f05fbd4",
+    "fepVerifiedCi": {
+      "runId": 33831032053,
+      "jobIds": [100893891064, 100893891304],
+      "artifactId": 9921685855,
+      "artifactDigest": "sha256:536c45d8cc1b53f4fc80834397004a7d354bbc586621a205811188fdbe2ce3c5"
+    }
   },
   "fixtureVectors": {
-    "payloadHash": "e74e3ba569b5ead1e6c13f2faf3a9c0fa6f3c44d79eab4db584b26b34c756830",
-    "innerSnapshotHash": "df13645538803434c0ea93c291e902ac0f578fcc22c6ee07f6923da1b47815e1",
-    "allocationReceiptHash": "c426dab2b02a6bd181da3fe7b842e86c971757dab1e6749faa656f59bc3258de",
-    "adapterReceiptHash": "880e428c3036234e3613edbac39e2b6ad6cad9c740ca133ffc5e60d83e074480"
+    "payloadHash": "dd9ef633bfcbff5942e58abf82d0299076b3323d927ed39088a42cef288aa762",
+    "innerSnapshotHash": "72bc98a75281c07aeef345dd2aba818ec58e1e3645f0d2bce0d5f7d9052d583f",
+    "allocationReceiptHash": "5b7c57c9caaf69444198e463537504be151ed9570eea8efa2e6f01d8f3c0e673",
+    "adapterReceiptHash": "d0b006ef0192f02b8655dcd461815d996a9d7d20169cdd8f1da0b07425b8b447"
+  },
+  "identityTenantBoundary": {
+    "adapterContract": "luzione-fep-allocation-a02-identity-tenant-adapter/v0.1-draft",
+    "identityTenantBindingHash": "10792cf5bae75494f09fb0eddcee7534e76bd0f16b46a8498c3f9abb371e2492",
+    "upstreamIdentityTenantBindingHash": "79f47bf6e8697eee477e40d59783f39ffb8e9a14957891a101a786041b4ea6ff",
+    "serverDerived": true,
+    "tenantSource": "VERIFIED_CREDENTIAL",
+    "tenantBoundary": "EXACT",
+    "credentialActorType": "service",
+    "logicalActorAccepted": false,
+    "callerTenantAccepted": false
   },
   "fepOwnedPostCommit": {
     "receiptState": "DOMAIN_COMMITTED",
@@ -67,11 +89,24 @@
     "runtimeActivation": false,
     "productionMigration": false
   },
+  "failureRollback": {
+    "injectedFailureCode": "INJECTED_FAILURE_ROLLBACK",
+    "correctedRetryDisposition": "SIMULATED",
+    "failedReplayClaims": 0,
+    "fepJournalWrites": 0,
+    "allocationWrites": 0,
+    "reservationWrites": 0,
+    "moneyEffects": 0,
+    "providerEffects": 0,
+    "runtimeActivations": 0,
+    "productionMigrations": 0
+  },
   "negativeCoverage": [
     "A02_EXACT_FIVE_PIN_DRIFT",
     "A02_IMPLEMENTATION_FINAL_AND_MANIFEST_DIGEST_DRIFT",
     "CALLER_PREMINTED_FINALITY_REJECTED",
-    "TENANT_AND_SERVER_IDENTITY",
+    "STRICT_TYPES_AND_SERVER_DERIVED_SERVICE_IDENTITY",
+    "VERIFIED_EXACT_TENANT_AND_LOGICAL_ACTOR_REJECTION",
     "TENANT_HEAD_AND_OBJECT_VERSION_CLOSURE",
     "B03_SCHEMA_AND_PRODUCER_DRIFT",
     "CONCURRENT_DUPLICATE_AND_IDEMPOTENCY_CONFLICT",

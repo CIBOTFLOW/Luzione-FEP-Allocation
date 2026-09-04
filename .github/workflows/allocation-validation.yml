@@ -24,7 +24,7 @@ jobs:
       - name: Build deterministic B07 G0 proof
         run: node scripts/b07Proof.js > b07-g0-proof.json
       - name: Validate exact-SHA proof artifact
-        run: node --input-type=module -e "import { readFileSync } from 'node:fs'; const proof = JSON.parse(readFileSync('b07-g0-proof.json')); if (proof.sourceSha !== process.env.GITHUB_SHA || proof.gate !== 'G0' || proof.injectedFailureRollback.zeroReplayClaim !== true) process.exit(1)"
+        run: node --input-type=module -e "import { readFileSync } from 'node:fs'; const proof = JSON.parse(readFileSync('b07-g0-proof.json')); const d = proof.concurrencyReplay.diagnostics; const r = proof.injectedFailureRollback.diagnostics; const expected = proof.fixtureVectors; const observed = proof.observed; if (proof.sourceSha !== process.env.GITHUB_SHA || proof.gate !== 'G0' || observed.adapterReceiptHash !== expected.adapterReceiptHash || observed.allocationReceiptHash !== expected.allocationReceiptHash || observed.innerSnapshotHash !== expected.innerSnapshotHash || observed.callerTenantAccepted !== false || proof.injectedFailureRollback.zeroReplayClaim !== true || d.fepJournalWrites + d.allocationWrites + d.reservationWrites + d.moneyEffects + d.providerEffects + d.runtimeActivations + d.productionMigrations !== 0 || Object.values(r).some(Boolean)) process.exit(1)"
       - name: Upload exact-SHA B07 proof
         uses: actions/upload-artifact@v4
         with:

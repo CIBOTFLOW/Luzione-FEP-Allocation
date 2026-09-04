@@ -56,8 +56,8 @@
           },
           "funding": {
             "contractVersion": "fep-balanced-journal/v0.1-draft",
-            "producerSha": "5db6cc8772c40a7127b7514c57787299ddad57a5",
-            "pinSha256": "931dc8d0e78547eadfcc123675df86f63e024615083352c43961ebeaa28387b5",
+            "producerSha": "7a50cfa9a9ec599241e936a64a58529868ca81eb",
+            "pinSha256": "f1b25c65a52682117b372b37c604d9966e2eb691649000f235504a37f14ccf23",
             "schemaSha256": "5023cebce38e4bb43a7372aad85bc457c48d9adf62b8ab9ab3d02a26ac0a54c4",
             "migrationSha256": "e13ea51c501bcc56825af0e7583ec0929d9f3d816acb232b6e2e234b7a299c0f",
             "rollbackSha256": "3b926e7c8602207d551d05efd03ee308af695e34aa09eeb034735f77d3bff583",
@@ -149,7 +149,7 @@
           ]
         }
       },
-      "payloadHash": "e74e3ba569b5ead1e6c13f2faf3a9c0fa6f3c44d79eab4db584b26b34c756830",
+      "payloadHash": "dd9ef633bfcbff5942e58abf82d0299076b3323d927ed39088a42cef288aa762",
       "policyVersionRefs": ["fep-policy-rules-v1"],
       "requestedAt": "2026-09-03T03:28:00.000Z",
       "requestedEffect": {
@@ -166,9 +166,9 @@
   },
   "now": "2026-09-03T08:12:00.000Z",
   "expected": {
-    "payloadHash": "e74e3ba569b5ead1e6c13f2faf3a9c0fa6f3c44d79eab4db584b26b34c756830",
-    "innerSnapshotHash": "df13645538803434c0ea93c291e902ac0f578fcc22c6ee07f6923da1b47815e1",
-    "allocationReceiptHash": "c426dab2b02a6bd181da3fe7b842e86c971757dab1e6749faa656f59bc3258de",
-    "adapterReceiptHash": "880e428c3036234e3613edbac39e2b6ad6cad9c740ca133ffc5e60d83e074480"
+    "payloadHash": "dd9ef633bfcbff5942e58abf82d0299076b3323d927ed39088a42cef288aa762",
+    "innerSnapshotHash": "72bc98a75281c07aeef345dd2aba818ec58e1e3645f0d2bce0d5f7d9052d583f",
+    "allocationReceiptHash": "5b7c57c9caaf69444198e463537504be151ed9570eea8efa2e6f01d8f3c0e673",
+    "adapterReceiptHash": "d0b006ef0192f02b8655dcd461815d996a9d7d20169cdd8f1da0b07425b8b447"
   }
 }

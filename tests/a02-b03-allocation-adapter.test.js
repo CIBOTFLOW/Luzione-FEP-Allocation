@@ -39,7 +39,7 @@ function zeroEffects(committed = 0) {
 
 test('exact controller, A02 implementation/final, five pins, digest domains, and B03 producer are immutable', () => {
   const pin = JSON.parse(readFileSync(new URL('../contracts/B07_PIN.json', import.meta.url), 'utf8'))
-  assert.equal(CONTRACT_PINS.controllerRelease, 'b43e5a65c0ae8c8bcef7e015e4a3484877f736b0')
+  assert.equal(CONTRACT_PINS.controllerRelease, '1ecf8ead139d4ecd1efc1840c7be6c1bd982d865')
   assert.equal(CONTRACT_PINS.apiProducerSha, '12685f46a60edea23aaa0a5403e300bf8858066b')
   assert.equal(CONTRACT_PINS.apiFinalEvidenceSha, 'bc43d5db8fe58230d6c3d35e32a73e1e8618b71e')
   assert.equal(CONTRACT_PINS.apiContractVersions.length, 5)
@@ -54,7 +54,7 @@ test('exact controller, A02 implementation/final, five pins, digest domains, and
       sha256: 'eaf983e1496187a22688ddfed45b541fe88a3e2b70a2fbc60863fae1a9484208',
     },
   })
-  assert.equal(CONTRACT_PINS.fepJournalProducerSha, '5db6cc8772c40a7127b7514c57787299ddad57a5')
+  assert.equal(CONTRACT_PINS.fepJournalProducerSha, '7a50cfa9a9ec599241e936a64a58529868ca81eb')
   assert.equal(pin.controller_release, CONTRACT_PINS.controllerRelease)
   assert.equal(pin.api.producer_sha, CONTRACT_PINS.apiProducerSha)
   assert.equal(pin.api.final_evidence_sha, CONTRACT_PINS.apiFinalEvidenceSha)
@@ -65,6 +65,14 @@ test('exact controller, A02 implementation/final, five pins, digest domains, and
   assert.notEqual(pin.api.manifest_digests.raw_file.sha256, pin.api.manifest_digests.canonical_json.sha256)
   assert.equal(pin.fep.producer_implementation_sha, CONTRACT_PINS.fepJournalProducerSha)
   assert.equal(pin.fep.command_fixture_sha256, CONTRACT_PINS.fepJournalFixtureSha256)
+  assert.equal(pin.fep.identity_tenant_fixture_sha256, CONTRACT_PINS.fepIdentityTenantFixtureSha256)
+  assert.equal(pin.fep.allocation_local_identity_tenant_fixture_sha256, CONTRACT_PINS.localIdentityTenantFixtureSha256)
+  assert.deepEqual(pin.fep.controller_verified_ci, {
+    run_id: 33831032053,
+    job_ids: [100893891064, 100893891304],
+    artifact_id: 9921685855,
+    artifact_digest: 'sha256:536c45d8cc1b53f4fc80834397004a7d354bbc586621a205811188fdbe2ce3c5',
+  })
 })
 
 test('Allocation accepts only FEP-owned post-commit receipt/readback and produces a deterministic no-effect receipt', () => {
@@ -72,10 +80,16 @@ test('Allocation accepts only FEP-owned post-commit receipt/readback and produce
   const result = new A02B03AllocationAdapter().simulate(data.input, data.now)
   assert.equal(result.disposition, 'SIMULATED')
   assert.equal(result.receipt.compatibilityInputHash, hash(data.input))
+  assert.equal(result.receipt.allocation.snapshotHash, data.expected.innerSnapshotHash)
+  assert.equal(result.receipt.allocation.receiptHash, data.expected.allocationReceiptHash)
+  assert.equal(result.receipt.receiptHash, data.expected.adapterReceiptHash)
   assert.equal(result.receipt.evidence.upstreamReceiptId, data.input.fepPostCommit.output.receipt.receiptId)
   assert.equal(result.receipt.evidence.sourceReadbackRef, data.input.fepPostCommit.output.readback.evidence.sourceReadbackRef)
   assert.equal(result.receipt.evidence.fepSourceConfirmed, true)
   assert.equal(result.receipt.evidence.fepBusinessFinal, true)
+  assert.equal(result.receipt.evidence.identityTenantBindingHash, '10792cf5bae75494f09fb0eddcee7534e76bd0f16b46a8498c3f9abb371e2492')
+  assert.equal(result.receipt.evidence.upstreamIdentityTenantBindingHash, '79f47bf6e8697eee477e40d59783f39ffb8e9a14957891a101a786041b4ea6ff')
+  assert.equal(result.receipt.evidence.callerTenantAccepted, false)
   assert.deepEqual(result.receipt.balance, { requestedMinor: 700, allocatedMinor: 700, balanced: true, currency: 'USD' })
   assert.deepEqual(result.receipt.authority, {
     syntheticOnly: true,
@@ -136,25 +150,29 @@ test('exact duplicate replays one receipt; changed payload conflicts without a s
 test('tenant and server-derived producer identity drift fail closed', () => {
   const cases = [
     [(data) => { data.input.command.context.tenant.tenantId = 'tenant-other' }, 'ALLOCATION_CONTEXT_DRIFT'],
-    [(data) => { data.input.command.context.serverDerived = false }, 'SERVER_DERIVED_CONTEXT_REQUIRED'],
-    [(data) => { data.input.command.context.tenant.source = 'CLIENT_INPUT' }, 'TENANT_AUTHORITY_INVALID'],
+    [(data) => { data.input.command.context.serverDerived = false }, 'A02_SERVER_DERIVED_CONTEXT_REQUIRED'],
+    [(data) => { data.input.command.context.tenant.source = 'CLIENT_INPUT' }, 'A02_TENANT_AUTHORITY_INVALID'],
+    [(data) => { data.input.command.context.credentialActor.actorType = 'user' }, 'A02_PRODUCER_IDENTITY_INVALID'],
+    [(data) => { data.input.command.context.logicalActor = { actorId: 'agent-x' } }, 'A02_LOGICAL_ACTOR_FORBIDDEN'],
     [(data) => { data.input.fepPostCommit.commandInput.command.context.tenant.tenantId = 'tenant-other' }, 'B03_POSTCOMMIT_CONTEXT_DRIFT'],
-    [(data) => { data.input.fepPostCommit.commandInput.command.context.credentialActor.actorType = 'user' }, 'B03_POSTCOMMIT_PRODUCER_IDENTITY_INVALID'],
-    [(data) => { data.input.fepPostCommit.commandInput.command.context.credentialActor.actorId = 7 }, 'B03_POSTCOMMIT_VALUE_INVALID'],
-    [(data) => { data.input.fepPostCommit.commandInput.command.context.logicalActor = { actorId: 'agent-x' } }, 'B03_POSTCOMMIT_PRODUCER_IDENTITY_INVALID'],
-    [(data) => { data.input.fepPostCommit.commandInput.command.context.authority.authorityClass = false }, 'B03_POSTCOMMIT_VALUE_INVALID'],
+    [(data) => { data.input.fepPostCommit.commandInput.command.context.credentialActor.actorType = 'user' }, 'A02_PRODUCER_IDENTITY_INVALID'],
+    [(data) => { data.input.fepPostCommit.commandInput.command.context.credentialActor.actorId = 7 }, 'A02_IDENTITY_VALUE_INVALID'],
+    [(data) => { data.input.fepPostCommit.commandInput.command.context.logicalActor = { actorId: 'agent-x' } }, 'A02_LOGICAL_ACTOR_FORBIDDEN'],
+    [(data) => { data.input.fepPostCommit.commandInput.command.context.authority.authorityClass = false }, 'A02_AUTHORITY_INVALID'],
   ]
   for (const [mutate, code] of cases) {
     const data = fixture()
     mutate(data)
-    expectCode(() => new A02B03AllocationAdapter().simulate(data.input, data.now), code)
+    const adapter = new A02B03AllocationAdapter()
+    expectCode(() => adapter.simulate(data.input, data.now), code)
+    assert.deepEqual(adapter.diagnostics(), zeroEffects())
   }
 })
 
 test('A02 exact pin, implementation, final-evidence, and FEP owner drift fail closed', () => {
   const cases = [
     [(data) => { data.input.pinnedContractVersions[0] = 'luzione-shared-contracts/v0.2-draft.2' }, 'CONTRACT_PIN_SET_MISMATCH'],
-    [(data) => { data.input.command.context.contractVersion = 'luzione-identity-tenant/v0.2-draft.2' }, 'CONTRACT_VERSION_MISMATCH'],
+    [(data) => { data.input.command.context.contractVersion = 'luzione-identity-tenant/v0.2-draft.2' }, 'A02_IDENTITY_CONTRACT_MISMATCH'],
     [(data) => { data.input.command.contractVersion = 'luzione-command-envelope/v0.2-draft.2' }, 'CONTRACT_VERSION_MISMATCH'],
     [(data) => { data.input.fepPostCommit.output.receipt.contractVersion = 'luzione-receipt-envelope/v0.2-draft.2' }, 'B03_POSTCOMMIT_RECEIPT_INVALID'],
     [(data) => { data.input.fepPostCommit.output.readback.contractVersion = 'luzione-readback-envelope/v0.2-draft.2' }, 'B03_POSTCOMMIT_FINALITY_REQUIRED'],
@@ -165,7 +183,9 @@ test('A02 exact pin, implementation, final-evidence, and FEP owner drift fail cl
   for (const [mutate, code] of cases) {
     const data = fixture()
     mutate(data)
-    expectCode(() => new A02B03AllocationAdapter().simulate(data.input, data.now), code)
+    const adapter = new A02B03AllocationAdapter()
+    expectCode(() => adapter.simulate(data.input, data.now), code)
+    assert.deepEqual(adapter.diagnostics(), zeroEffects())
   }
 })
 
@@ -180,7 +200,9 @@ test('stale, future, pending, nonfinal, and mismatched FEP readback are rejected
   for (const [mutate, code] of cases) {
     const data = fixture()
     mutate(data)
-    expectCode(() => new A02B03AllocationAdapter().simulate(data.input, data.now), code)
+    const adapter = new A02B03AllocationAdapter()
+    expectCode(() => adapter.simulate(data.input, data.now), code)
+    assert.deepEqual(adapter.diagnostics(), zeroEffects())
   }
 })
 
@@ -195,7 +217,9 @@ test('fairness metadata is non-decisional, small groups are private, and appeal 
   const privateData = fixture()
   privateData.input.command.payload.allocationSnapshot.candidates[0].eligibilityRef = 'person@example.com'
   rehash(privateData)
-  expectCode(() => new A02B03AllocationAdapter().simulate(privateData.input, privateData.now), 'ELIGIBILITY_REFERENCE_INVALID')
+  const privateAdapter = new A02B03AllocationAdapter()
+  expectCode(() => privateAdapter.simulate(privateData.input, privateData.now), 'ELIGIBILITY_REFERENCE_INVALID')
+  assert.deepEqual(privateAdapter.diagnostics(), zeroEffects())
 })
 
 test('effect, provider, money, runtime, migration, and schema authority injections fail closed', () => {
@@ -209,7 +233,9 @@ test('effect, provider, money, runtime, migration, and schema authority injectio
   for (const [mutate, code] of cases) {
     const data = fixture()
     mutate(data)
-    expectCode(() => new A02B03AllocationAdapter().simulate(data.input, data.now), code)
+    const adapter = new A02B03AllocationAdapter()
+    expectCode(() => adapter.simulate(data.input, data.now), code)
+    assert.deepEqual(adapter.diagnostics(), zeroEffects())
   }
 })
 

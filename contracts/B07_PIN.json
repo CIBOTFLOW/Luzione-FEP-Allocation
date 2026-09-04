@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
-  "controller_release": "b43e5a65c0ae8c8bcef7e015e4a3484877f736b0",
-  "controller_evidence": "evidence/SYNC_REVIEW_20260903T234455Z.md",
+  "controller_release": "1ecf8ead139d4ecd1efc1840c7be6c1bd982d865",
+  "controller_authorization": "issue-14-comment-5535226733",
   "adapter_contract": "luzione-fep-allocation-simulation/v0.2-draft",
   "receipt_contract": "luzione-fep-allocation-receipt/v0.2-draft",
   "effect_mode": "DISABLED",
@@ -38,13 +38,24 @@
   },
   "fep": {
     "owner": "CIBOTFLOW/FEP-Platform",
-    "producer_implementation_sha": "5db6cc8772c40a7127b7514c57787299ddad57a5",
-    "pin_sha256": "931dc8d0e78547eadfcc123675df86f63e024615083352c43961ebeaa28387b5",
+    "producer_implementation_sha": "7a50cfa9a9ec599241e936a64a58529868ca81eb",
+    "pin_sha256": "f1b25c65a52682117b372b37c604d9966e2eb691649000f235504a37f14ccf23",
     "balanced_journal": "fep-balanced-journal/v0.1-draft",
     "balanced_journal_schema_sha256": "5023cebce38e4bb43a7372aad85bc457c48d9adf62b8ab9ab3d02a26ac0a54c4",
     "durable_rehearsal_migration_sha256": "e13ea51c501bcc56825af0e7583ec0929d9f3d816acb232b6e2e234b7a299c0f",
     "durable_rehearsal_rollback_sha256": "3b926e7c8602207d551d05efd03ee308af695e34aa09eeb034735f77d3bff583",
     "command_fixture_sha256": "57f17445caaa13efe9aeb9a3316bae83adade99d800d81159bdb78556cddd016",
+    "identity_tenant_fixture_sha256": "0d6a5dc72d93d79c6429ac38c28183c42020e6cccca3e2e144d88c78e0d4b8cb",
+    "allocation_local_identity_tenant_fixture_sha256": "8e81394c8a6df170a86601f47005dda89e519b63c16912b0d25fd43324057438",
+    "pr41_head_sha": "594c3d3584ffed29ac776486b28255cf178f4bd2",
+    "pr41_rehearsal_sha256": "b140915dddccac8966446e22ac7d8920b3c0e4a8c0cb0e3231b8f7577a0e714e",
+    "pr41_rollback_sha256": "7bf8fff096236b029c7ba5d0c128d9660559a68eeb842acffad961624f05fbd4",
+    "controller_verified_ci": {
+      "run_id": 33831032053,
+      "job_ids": [100893891064, 100893891304],
+      "artifact_id": 9921685855,
+      "artifact_digest": "sha256:536c45d8cc1b53f4fc80834397004a7d354bbc586621a205811188fdbe2ce3c5"
+    },
     "policy": "fep-policy-rules-v1",
     "receipt_shape": ["disposition", "tenantId", "transactionId", "appendIndex", "previousTransactionHash", "transactionHash", "effectMode"],
     "readback_shape": ["tenantId", "valid", "transactionCount", "headHash", "balances", "effectMode"],
@@ -53,6 +64,15 @@
       "readback_finality": "SOURCE_CONFIRMED",
       "business_final": true,
       "caller_preminted_finality_accepted": false
+    },
+    "identity_tenant_semantics": {
+      "boundary": "ALLOCATION_LOCAL_STRICT_A02_ADAPTER",
+      "server_derived": true,
+      "tenant_source": "VERIFIED_CREDENTIAL",
+      "tenant_boundary": "EXACT",
+      "credential_actor_type": "service",
+      "logical_actor_accepted": false,
+      "caller_tenant_accepted": false
     },
     "status": "G0_FEP_OWNED_POST_COMMIT_RECEIPT_READBACK_CONSUMED_NO_EFFECT"
   },

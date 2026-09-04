@@ -1,4 +1,5 @@
 import { AllocationError, hash } from './canonical.js'
+import { validateA02IdentityTenant } from './a02IdentityTenantAdapter.js'
 import { AtomicNoEffectReplayClaims, validateDurableB03Funding } from './b03DurableFundingAdapter.js'
 import { validateFepPostCommitEvidence } from './b03PostCommitEvidenceAdapter.js'
 import { CONTRACT_PINS } from './contractPins.js'
@@ -58,68 +59,6 @@ function validatePinSet(actual) {
   }
 }
 
-function validateIdentity(identity) {
-  assertExactKeys(identity, [
-    'contractVersion',
-    'serverDerived',
-    'request',
-    'credentialActor',
-    'logicalActor',
-    'tenant',
-    'authority',
-    'sourceVersionRefs',
-  ], 'command.context')
-  if (identity.contractVersion !== CONTRACT_PINS.identityContract) {
-    fail('CONTRACT_VERSION_MISMATCH', 'identity contract version is not pinned', 409)
-  }
-  if (identity.serverDerived !== true) {
-    fail('SERVER_DERIVED_CONTEXT_REQUIRED', 'identity context must be server derived', 403)
-  }
-
-  assertExactKeys(identity.request, ['requestId', 'correlationId', 'traceId', 'spanId', 'requestedAt'], 'command.context.request')
-  assertText(identity.request.requestId, 'command.context.request.requestId')
-  assertText(identity.request.correlationId, 'command.context.request.correlationId')
-  if (!/^[a-f0-9]{32}$/.test(identity.request.traceId) || !/^[a-f0-9]{16}$/.test(identity.request.spanId)) {
-    fail('TRACE_CONTEXT_INVALID', 'trace context does not match the pinned producer shape')
-  }
-  assertTimestamp(identity.request.requestedAt, 'command.context.request.requestedAt')
-
-  assertExactKeys(identity.credentialActor, ['actorId', 'actorType', 'credentialSource'], 'command.context.credentialActor')
-  assertText(identity.credentialActor.actorId, 'command.context.credentialActor.actorId')
-  if (!['agent', 'service', 'user'].includes(identity.credentialActor.actorType)) {
-    fail('ACTOR_INVALID', 'credential actor type is invalid')
-  }
-  if (!['service-token', 'vercel-oidc'].includes(identity.credentialActor.credentialSource)) {
-    fail('CREDENTIAL_SOURCE_INVALID', 'credential source is invalid')
-  }
-  if (identity.logicalActor !== null) {
-    assertExactKeys(identity.logicalActor, ['actorId', 'actorType', 'definitionVersion', 'delegationEvidenceRef'], 'command.context.logicalActor')
-    if (identity.logicalActor.actorType !== 'agent') fail('LOGICAL_ACTOR_INVALID', 'logical actor must be an agent')
-    assertText(identity.logicalActor.actorId, 'command.context.logicalActor.actorId')
-    assertText(identity.logicalActor.definitionVersion, 'command.context.logicalActor.definitionVersion')
-    assertText(identity.logicalActor.delegationEvidenceRef, 'command.context.logicalActor.delegationEvidenceRef')
-  }
-
-  assertExactKeys(identity.tenant, ['tenantId', 'source', 'boundary'], 'command.context.tenant')
-  assertText(identity.tenant.tenantId, 'command.context.tenant.tenantId')
-  if (identity.tenant.source !== 'VERIFIED_CREDENTIAL' || identity.tenant.boundary !== 'EXACT') {
-    fail('TENANT_AUTHORITY_INVALID', 'tenant must be exact and derived from a verified credential', 403)
-  }
-  assertExactKeys(identity.authority, ['authorityClass', 'capability', 'purpose'], 'command.context.authority')
-  if (
-    identity.authority.capability !== 'fep.allocation.simulate' ||
-    identity.authority.purpose !== 'synthetic-b07-compatibility'
-  ) {
-    fail('CAPABILITY_INVALID', 'identity authority is outside the isolated allocation simulation capability', 403)
-  }
-  if (
-    !Array.isArray(identity.sourceVersionRefs) ||
-    hash([...identity.sourceVersionRefs].sort()) !== hash(['authority-subject/v0.1', 'request-identity/v1'].sort())
-  ) {
-    fail('SOURCE_VERSION_MISMATCH', 'identity source versions do not match the producer pin', 409)
-  }
-}
-
 function validateCommand(command) {
   assertExactKeys(command, [
     'contractVersion',
@@ -141,7 +80,12 @@ function validateCommand(command) {
   }
   if (command.activation !== 'DRAFT_ONLY') fail('DRAFT_ACTIVATION_REQUIRED', 'runtime activation is forbidden', 403)
   if (command.commandType !== 'fep.allocation.simulate') fail('COMMAND_TYPE_INVALID', 'only synthetic allocation simulation is accepted')
-  validateIdentity(command.context)
+  const identityBinding = validateA02IdentityTenant(command.context, {
+    actorType: 'service',
+    authorityClass: 'INTERNAL_DRAFT',
+    capability: 'fep.allocation.simulate',
+    purpose: 'synthetic-b07-compatibility',
+  })
   assertText(command.commandId, 'command.commandId')
   assertText(command.expectedObjectVersion, 'command.expectedObjectVersion')
   assertText(command.idempotencyKey, 'command.idempotencyKey')
@@ -184,6 +128,7 @@ function validateCommand(command) {
   ) {
     fail('ALLOCATION_CONTEXT_DRIFT', 'allocation request does not close the A02 tenant, correlation, and idempotency context', 409)
   }
+  return identityBinding
 }
 
 function engineEnvelope(input) {
@@ -218,7 +163,7 @@ function validateCompatibilityInput(input, now) {
   }
   assertExactKeys(input, ['pinnedContractVersions', 'command', 'fepPostCommit'], 'compatibilityInput')
   validatePinSet(input.pinnedContractVersions)
-  validateCommand(input.command)
+  const identityBinding = validateCommand(input.command)
   const durableFunding = validateDurableB03Funding(
     input.command.payload.allocationSnapshot.funding,
     input.command.context,
@@ -235,10 +180,11 @@ function validateCompatibilityInput(input, now) {
     commandKey: `${input.command.context.tenant.tenantId}:${input.command.commandId}`,
     durableFunding,
     fepPostCommit,
+    identityBinding,
   }
 }
 
-function buildReceipt(input, compatibilityInputHash, durableFunding, fepPostCommit) {
+function buildReceipt(input, compatibilityInputHash, durableFunding, fepPostCommit, identityBinding) {
   const allocation = new DeterministicAllocationEngine().simulate(engineEnvelope(input)).receipt
   if (allocation.allocatedMinor !== input.command.payload.allocationSnapshot.request.requestedAmountMinor) {
     fail('ALLOCATION_BALANCE_MISMATCH', 'allocation receipt does not balance to the requested amount', 409)
@@ -259,9 +205,18 @@ function buildReceipt(input, compatibilityInputHash, durableFunding, fepPostComm
       fepMigrationSha256: CONTRACT_PINS.fepJournalMigrationSha256,
       fepRollbackSha256: CONTRACT_PINS.fepJournalRollbackSha256,
       fepJournalFixtureSha256: CONTRACT_PINS.fepJournalFixtureSha256,
+      fepIdentityTenantFixtureSha256: CONTRACT_PINS.fepIdentityTenantFixtureSha256,
+      localIdentityTenantFixtureSha256: CONTRACT_PINS.localIdentityTenantFixtureSha256,
+      fepPr41HeadSha: CONTRACT_PINS.fepPr41HeadSha,
+      fepPr41RehearsalSha256: CONTRACT_PINS.fepPr41RehearsalSha256,
+      fepPr41RollbackSha256: CONTRACT_PINS.fepPr41RollbackSha256,
+      fepVerifiedCi: CONTRACT_PINS.fepVerifiedCi,
     },
     evidence: {
       commandId: input.command.commandId,
+      identityTenantBindingHash: identityBinding.identityTenantBindingHash,
+      upstreamIdentityTenantBindingHash: fepPostCommit.identityTenantBindingHash,
+      callerTenantAccepted: identityBinding.callerTenantAccepted,
       upstreamReceiptId: fepPostCommit.receiptId,
       sourceReadbackRef: fepPostCommit.sourceReadbackRef,
       fepJournalHeadHash: durableFunding.replayHeadHash,
@@ -315,7 +270,7 @@ export class A02B03AllocationAdapter {
   }
 
   simulate(input, now) {
-    const { compatibilityInputHash, commandKey, durableFunding, fepPostCommit } = validateCompatibilityInput(input, now)
+    const { compatibilityInputHash, commandKey, durableFunding, fepPostCommit, identityBinding } = validateCompatibilityInput(input, now)
     const previous = this.commands.get(commandKey)
     if (previous) {
       if (previous.inputHash !== compatibilityInputHash) {
@@ -324,15 +279,15 @@ export class A02B03AllocationAdapter {
       return immutableClone({ disposition: 'REPLAYED', receipt: previous.receipt })
     }
 
-    const receipt = buildReceipt(input, compatibilityInputHash, durableFunding, fepPostCommit)
+    const receipt = buildReceipt(input, compatibilityInputHash, durableFunding, fepPostCommit, identityBinding)
     this.commands.set(commandKey, { inputHash: compatibilityInputHash, receipt })
     return immutableClone({ disposition: 'SIMULATED', receipt })
   }
 
   async simulateAtomic(input, now, options = {}) {
-    const { compatibilityInputHash, commandKey, durableFunding, fepPostCommit } = validateCompatibilityInput(input, now)
+    const { compatibilityInputHash, commandKey, durableFunding, fepPostCommit, identityBinding } = validateCompatibilityInput(input, now)
     return this.atomicClaims.transact(commandKey, compatibilityInputHash, async () => {
-      const receipt = buildReceipt(input, compatibilityInputHash, durableFunding, fepPostCommit)
+      const receipt = buildReceipt(input, compatibilityInputHash, durableFunding, fepPostCommit, identityBinding)
       if (options.injectFailureAfterReceipt === true) {
         fail('INJECTED_FAILURE_ROLLBACK', 'synthetic failure injected before the replay claim commit', 503)
       }

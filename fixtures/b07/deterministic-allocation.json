@@ -22,7 +22,7 @@
     },
     "funding": {
       "contractVersion": "fep-balanced-journal/v0.1-draft",
-      "producerSha": "5db6cc8772c40a7127b7514c57787299ddad57a5",
+      "producerSha": "7a50cfa9a9ec599241e936a64a58529868ca81eb",
       "schemaSha256": "5023cebce38e4bb43a7372aad85bc457c48d9adf62b8ab9ab3d02a26ac0a54c4",
       "journalHeadHash": "2222222222222222222222222222222222222222222222222222222222222222",
       "sourceReceiptHash": "3333333333333333333333333333333333333333333333333333333333333333",
@@ -59,6 +59,6 @@
       }
     ]
   },
-  "snapshotHash": "0caeab677db2424e590aa3aca0176d583e954daa8c3b99347e69e4eaf0aec7d8",
-  "expectedReceiptHash": "a57df811cac4a0688e7359fcb5a152b09dc2d538152085e975eeb8b977f105bc"
+  "snapshotHash": "b16132f7beaabe029330c5bfc7d36b6fc6162066a091f56d85f452d4e775470d",
+  "expectedReceiptHash": "821ac028e60188a94950bc31bd5a7a1cbab2c0691754c9940d3640bc646157c1"
 }

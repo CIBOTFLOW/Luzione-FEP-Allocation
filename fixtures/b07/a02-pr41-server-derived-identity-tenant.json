@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "luzione-fep-allocation-a02-identity-tenant-fixture/v0.1-draft",
+  "sourceRepository": "CIBOTFLOW/FEP-Platform",
+  "sourceImplementationSha": "7a50cfa9a9ec599241e936a64a58529868ca81eb",
+  "sourcePath": "contracts/fep-balanced-journal-v0.1-draft/fixtures/current-a02-pr41-human-decision-v0.2-draft.1.json",
+  "sourceFixtureSha256": "0d6a5dc72d93d79c6429ac38c28183c42020e6cccca3e2e144d88c78e0d4b8cb",
+  "identity": {
+    "contractVersion": "luzione-identity-tenant/v0.2-draft.1",
+    "serverDerived": true,
+    "request": {
+      "requestId": "req-30000000-0000-4000-8000-000000000001",
+      "correlationId": "corr-pr41-a02-alpha",
+      "traceId": "33333333333333333333333333333333",
+      "spanId": "4444444444444444",
+      "requestedAt": "2026-09-04T02:30:00.000Z"
+    },
+    "credentialActor": {
+      "actorId": "40000000-0000-4000-8000-000000000001",
+      "actorType": "user",
+      "credentialSource": "vercel-oidc"
+    },
+    "logicalActor": null,
+    "tenant": {
+      "tenantId": "tenant-pr41-alpha",
+      "source": "VERIFIED_CREDENTIAL",
+      "boundary": "EXACT"
+    },
+    "authority": {
+      "authorityClass": "HUMAN_REVIEW_NO_EFFECT",
+      "capability": "fep.case.review.nonapproval",
+      "purpose": "synthetic-pr41-identity-tenant-rehearsal"
+    },
+    "sourceVersionRefs": [
+      "authority-subject/v0.1",
+      "request-identity/v1"
+    ]
+  },
+  "authority": {
+    "adapterOnly": true,
+    "allocationAuthorityGranted": false,
+    "callerTenantAccepted": false,
+    "effectMode": "NO_EFFECT"
+  }
+}

@@ -1,4 +1,5 @@
 import { AllocationError, hash } from './canonical.js'
+import { validateA02IdentityTenant } from './a02IdentityTenantAdapter.js'
 import { CONTRACT_PINS } from './contractPins.js'
 
 function fail(code, message, status = 409) {
@@ -67,50 +68,17 @@ function journalStreamId(tenantId) {
 }
 
 function validateUpstreamIdentity(identity, allocationIdentity) {
-  assertExactKeys(identity, [
-    'contractVersion', 'serverDerived', 'request', 'credentialActor', 'logicalActor',
-    'tenant', 'authority', 'sourceVersionRefs',
-  ], 'fepPostCommit.commandInput.command.context')
-  if (identity.contractVersion !== CONTRACT_PINS.identityContract || identity.serverDerived !== true) {
-    fail('B03_POSTCOMMIT_IDENTITY_INVALID', 'FEP command identity must be the exact server-derived A02 identity contract', 403)
-  }
-  assertExactKeys(identity.request, ['requestId', 'correlationId', 'traceId', 'spanId', 'requestedAt'], 'fepPostCommit.commandInput.command.context.request')
-  assertText(identity.request.requestId, 'fep command request id')
-  assertText(identity.request.correlationId, 'fep command correlation id')
-  assertTimestamp(identity.request.requestedAt, 'fep command requestedAt')
-  if (!/^[a-f0-9]{32}$/.test(identity.request.traceId) || !/^[a-f0-9]{16}$/.test(identity.request.spanId)) {
-    fail('B03_POSTCOMMIT_IDENTITY_INVALID', 'FEP trace context is not strict A02 hexadecimal form')
-  }
-  assertExactKeys(identity.credentialActor, ['actorId', 'actorType', 'credentialSource'], 'fepPostCommit.commandInput.command.context.credentialActor')
-  assertText(identity.credentialActor.actorId, 'fep credential actor id')
-  if (identity.credentialActor.actorType !== 'service' || !['service-token', 'vercel-oidc'].includes(identity.credentialActor.credentialSource)) {
-    fail('B03_POSTCOMMIT_PRODUCER_IDENTITY_INVALID', 'FEP evidence must originate from a server service credential', 403)
-  }
-  if (identity.logicalActor !== null) {
-    fail('B03_POSTCOMMIT_PRODUCER_IDENTITY_INVALID', 'delegated logical actors cannot mint FEP journal finality', 403)
-  }
-  assertExactKeys(identity.tenant, ['tenantId', 'source', 'boundary'], 'fepPostCommit.commandInput.command.context.tenant')
-  assertText(identity.tenant.tenantId, 'fep tenant id')
-  if (identity.tenant.source !== 'VERIFIED_CREDENTIAL' || identity.tenant.boundary !== 'EXACT') {
-    fail('B03_POSTCOMMIT_TENANT_INVALID', 'FEP evidence tenant must be exact and credential-derived', 403)
-  }
-  assertExactKeys(identity.authority, ['authorityClass', 'capability', 'purpose'], 'fepPostCommit.commandInput.command.context.authority')
-  assertText(identity.authority.authorityClass, 'fep authority class')
-  assertText(identity.authority.capability, 'fep authority capability')
-  assertText(identity.authority.purpose, 'fep authority purpose')
-  if (identity.authority.capability !== 'fep.journal.simulate' || identity.authority.purpose !== 'synthetic-b03-compatibility') {
-    fail('B03_POSTCOMMIT_AUTHORITY_INVALID', 'FEP evidence is outside the isolated journal compatibility purpose', 403)
-  }
-  if (!Array.isArray(identity.sourceVersionRefs)
-    || identity.sourceVersionRefs.some((version) => typeof version !== 'string')
-    || new Set(identity.sourceVersionRefs).size !== identity.sourceVersionRefs.length) {
-    fail('B03_POSTCOMMIT_VERSION_MISMATCH', 'FEP identity source versions must be unique strings')
-  }
-  assertSame([...identity.sourceVersionRefs].sort(), ['authority-subject/v0.1', 'request-identity/v1'].sort(), 'B03_POSTCOMMIT_VERSION_MISMATCH', 'FEP identity source versions drifted')
-  if (identity.tenant.tenantId !== allocationIdentity.tenant.tenantId
-    || identity.request.correlationId !== allocationIdentity.request.correlationId) {
+  const binding = validateA02IdentityTenant(identity, {
+    actorType: 'service',
+    authorityClass: 'INTERNAL_DRAFT',
+    capability: 'fep.journal.simulate',
+    purpose: 'synthetic-b03-compatibility',
+  })
+  if (binding.tenant.tenantId !== allocationIdentity.tenant.tenantId
+    || binding.correlationId !== allocationIdentity.request.correlationId) {
     fail('B03_POSTCOMMIT_CONTEXT_DRIFT', 'FEP journal evidence does not close the Allocation tenant and correlation context', 403)
   }
+  return binding
 }
 
 function validateCommandInput(commandInput, allocationIdentity) {
@@ -127,7 +95,7 @@ function validateCommandInput(commandInput, allocationIdentity) {
   assertText(command.commandId, 'fep command id')
   assertText(command.idempotencyKey, 'fep command idempotency key')
   assertTimestamp(command.requestedAt, 'fep command requestedAt')
-  validateUpstreamIdentity(command.context, allocationIdentity)
+  const identityBinding = validateUpstreamIdentity(command.context, allocationIdentity)
   if (command.requestedAt !== command.context.request.requestedAt) {
     fail('B03_POSTCOMMIT_CONTEXT_DRIFT', 'FEP command and identity timestamps differ')
   }
@@ -158,7 +126,7 @@ function validateCommandInput(commandInput, allocationIdentity) {
     || command.target.objectVersion !== preCommandVersion) {
     fail('B03_POSTCOMMIT_TARGET_MISMATCH', 'FEP command target does not bind the exact tenant journal head')
   }
-  return command
+  return { command, identityBinding }
 }
 
 function expectedEvidenceIds(command, transactionHash) {
@@ -184,7 +152,7 @@ export function validateFepPostCommitEvidence(wrapper, funding, allocationIdenti
     || wrapper.producerImplementationSha !== CONTRACT_PINS.fepJournalProducerSha) {
     fail('B03_POSTCOMMIT_OWNER_MISMATCH', 'post-commit evidence is not owned by the exact FEP producer', 403)
   }
-  const command = validateCommandInput(wrapper.commandInput, allocationIdentity)
+  const { command, identityBinding } = validateCommandInput(wrapper.commandInput, allocationIdentity)
   const output = wrapper.output
   assertExactKeys(output, [
     'producer', 'producerFinalEvidenceSha', 'contractVersions', 'compatibilityInputHash', 'tenantId',
@@ -340,6 +308,7 @@ export function validateFepPostCommitEvidence(wrapper, funding, allocationIdenti
   return immutableClone({
     ownerProject: wrapper.ownerProject,
     implementationSha: wrapper.producerImplementationSha,
+    identityTenantBindingHash: identityBinding.identityTenantBindingHash,
     preCommandObjectVersion,
     committedObjectVersion,
     compatibilityInputHash: output.compatibilityInputHash,
