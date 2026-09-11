@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0.0",
+  "task_id": "FEP-G03",
+  "build_program": "SGO-20260911-01",
+  "controller_decision_sha": "eec7cddb1f6f20f20e9ffb8b6c4873d0d0abe28e",
+  "controller_transfer_evidence": "evidence/FEP_G02_AND_G01_DEPENDENCY_ACCEPTANCE_20260911T173535Z.md",
+  "repository": "CIBOTFLOW/Luzione-FEP-Allocation",
+  "branch": "codex/l4-fep-g03-source-replay-parity-20260911",
+  "base_branch": "codex/b07-b03-identity-tenant-compat-v0.3",
+  "base_sha": "79045efc637d28877ee2ce5b319fe1d2d21302e5",
+  "base_tree_sha": "de5802ae493f4dee7bb1e0a18a4c60f682c0fb05",
+  "implementation_sha": "21b0d9d026c81256f6294f74594e279456ad9752",
+  "implementation_tree_sha": "c30cb7d967b898778f6a1dfc961c86eb21ec6fd4",
+  "handoff_head": "Resolve this file's containing commit; the implementation SHA above is the exact code tested.",
+  "recorded_at": "2026-09-11T17:48:58Z",
+  "changed_paths": [
+    "src/fepG03ConsumerSourceReplayAdapter.js",
+    "tests/fep-g03-consumer-source-replay-parity.test.js",
+    "docs/handoffs/FEP_G03_20260911.json"
+  ],
+  "summary": "Add a stateless Allocation-local projection that binds the exact preserved FEP producer, API pins, tenant, receipt, readback, object version, journal head, source receipt and sequence to the existing deterministic consumer receipt and replay namespace.",
+  "source_reconciliation": {
+    "remote_source_head": "79045efc637d28877ee2ce5b319fe1d2d21302e5",
+    "local_source_head": "79045efc637d28877ee2ce5b319fe1d2d21302e5",
+    "source_dirty_paths": [],
+    "default_branch": "feat/fep-allocation-v0.3",
+    "default_head": "ac8d1e52d7a13a761d9c5225ed4ba1c95aecffc3",
+    "historical_source_checkout": "clean and preserved without writes",
+    "implementation_checkout": "isolated worktree on a new non-default branch",
+    "competing_writer_observed": false
+  },
+  "consumer_contract": {
+    "version": "luzione-fep-allocation-consumer-source-replay/v1",
+    "source_state": "AVAILABLE",
+    "claim_storage": "PROCESS_LOCAL_G0_ONLY",
+    "durable_replay_claimed": false,
+    "runtime_route_added": false,
+    "database_or_ledger_added": false,
+    "live_allocation_added": false,
+    "provider_or_financial_effect_added": false
+  },
+  "producer_pins": {
+    "changed": false,
+    "allocation_preserved": "79045efc637d28877ee2ce5b319fe1d2d21302e5",
+    "api": "CIBOTFLOW/Luzione-API@12685f46a60edea23aaa0a5403e300bf8858066b",
+    "api_final_evidence": "bc43d5db8fe58230d6c3d35e32a73e1e8618b71e",
+    "api_contract_versions": [
+      "luzione-shared-contracts/v0.2-draft.1",
+      "luzione-identity-tenant/v0.2-draft.1",
+      "luzione-command-envelope/v0.2-draft.1",
+      "luzione-receipt-envelope/v0.2-draft.1",
+      "luzione-readback-envelope/v0.2-draft.1"
+    ],
+    "fep": "CIBOTFLOW/FEP-Platform@7a50cfa9a9ec599241e936a64a58529868ca81eb",
+    "fep_journal_contract": "fep-balanced-journal/v0.1-draft",
+    "fep_g01_bounded_candidate_not_consumed": "ced6c7703b2c651d773d38dec68fc4ef1dde44e1",
+    "fep_g02_bounded_candidate_not_consumed": "0a734cb4b3c6a89c98a81df19dd9b3a8b51f6801",
+    "reason": "FEP-G01 and FEP-G02 remain bounded G0 integration candidates without G1 acceptance; consumer pins cannot move implicitly."
+  },
+  "engineering_state": "IMPLEMENTED_TESTED",
+  "release_evidence": "LOCAL_FULL_GATE_PASS_REMOTE_EXACT_HEAD_CI_PENDING",
+  "effect_authority": "NO_EFFECT",
+  "gate": "G0",
+  "score_change": 0,
+  "deterministic_vectors": {
+    "source_binding_hash": "94bac35e03e902ca884da6b1d955f87aa294279e84d9c57dc2ad32974d9c5476",
+    "parity_evidence_hash": "7b5be2b5d879ebe875ee2128bdc65d9570f45edb62503207f40ce5c10c58e3a2",
+    "consumer_receipt_hash": "d0b006ef0192f02b8655dcd461815d996a9d7d20169cdd8f1da0b07425b8b447",
+    "allocation_receipt_hash": "5b7c57c9caaf69444198e463537504be151ed9570eea8efa2e6f01d8f3c0e673"
+  },
+  "tests": {
+    "baseline": {
+      "command": "npm run check",
+      "passed": 46,
+      "failed": 0
+    },
+    "regression_first": "Focused test initially failed because the FEP-G03 consumer adapter did not exist.",
+    "focused": {
+      "command": "node --test tests/fep-g03-consumer-source-replay-parity.test.js",
+      "passed": 9,
+      "failed": 0
+    },
+    "full": {
+      "command": "npm run check",
+      "syntax_build": "pass",
+      "passed": 55,
+      "failed": 0
+    },
+    "preserved_proof": {
+      "command": "npm run proof:b07",
+      "result": "pass with the existing deterministic no-effect vectors unchanged"
+    },
+    "dependency_audit": "not applicable: package.json declares no external dependencies and the repository has no lockfile",
+    "diff_check": "pass",
+    "reverse_patch": "pass for both implementation paths back to the exact preserved base"
+  },
+  "negative_and_recovery_paths": [
+    "producer, tenant, receipt, readback, object-version and journal-head drift fail before any replay claim",
+    "bounded FEP-G01 and FEP-G02 heads cannot silently replace the preserved producer pin",
+    "changed source evidence under the same command conflicts without a second claim",
+    "tampered consumer or allocation receipt hashes are rejected",
+    "effect, provider, money, journal, allocation, reservation, approval, appeal, runtime and migration authority remain denied",
+    "32 concurrent exact source deliveries create one process-local claim and 31 exact replays with identical source, receipt and parity hashes",
+    "synchronous and atomic entrypoints share the preserved replay namespace in both directions",
+    "injected failure commits no claim; a corrected retry becomes the sole claim"
+  ],
+  "authority_counters": {
+    "fep_journal_writes": 0,
+    "allocation_writes": 0,
+    "reservation_writes": 0,
+    "money_effects": 0,
+    "provider_effects": 0,
+    "runtime_activations": 0,
+    "production_migrations": 0
+  },
+  "rollback": {
+    "kind": "source-only reverse patch",
+    "result": "pass",
+    "production_rollback": "not performed"
+  },
+  "release_limits": [
+    "The projection is not mounted on a route and consumes only committed synthetic fixtures through the preserved adapters.",
+    "Replay claims remain process-local and are explicitly not described as durable integration evidence.",
+    "No authenticated live FEP source, exact-final-SHA remote CI, deployment, or production recovery is claimed.",
+    "No contract pin, alternate ledger, storage, migration, credential, provider, money, default-branch, deployment, or G1/G2 action was performed.",
+    "Legacy B07 was not dispatched, resumed, completed, modified, or expanded; it remains provenance context only."
+  ],
+  "next_item": {
+    "id": "FEP-G04",
+    "repository": "CIBOTFLOW/Sultan-FEP",
+    "scope": "Prove shadow failure and recovery boundaries while recommendations remain non-authoritative and live shadow jobs remain stopped.",
+    "blocked_until": "Controller accepts this exact Allocation handoff, releases the current repository lease, and explicitly switches SGO-20260911-01-L4 to Sultan-FEP."
+  },
+  "writer_lease": {
+    "id": "SGO-20260911-01-L4",
+    "owner": "01a0916a-7911-7041-bd7e-a6ff23ff5146",
+    "repository": "CIBOTFLOW/Luzione-FEP-Allocation",
+    "state": "retained_pending_controller_acceptance_and_repository_switch",
+    "expires_at": "2026-09-11T19:08:29Z"
+  }
+}
